@@ -247,12 +247,32 @@ class speedport {
 		$fields = array('exporttype' => '3');
 		$cookie = 'challengev='.$this->challenge.'; '.$this->session;
 		$data = $this->sentRequest($path, $fields, $cookie);
-		
+		print_r($data);
 		if (empty($data['body'])) {
 			throw new Exception('unable to get syslog data');
 		}
 		
 		return explode("\n", $data['body']);
+	}
+	
+	/**
+	 * check if firmware is actual
+	 * 
+	 * @return	array
+	 */
+	public function checkFirmware () {
+		$path = 'data/checkfirmware.json';
+		$fields = array('checkfirmware' => 'true');
+		$cookie = 'challengev='.$this->challenge.'; '.$this->session;
+		$data = $this->sentRequest($path, $fields, $cookie);
+		
+		if (empty($data['body'])) {
+			throw new Exception('unable to get checkfirmware data');
+		}
+		
+		$json = json_decode($data['body'], true);
+		
+		return $json;
 	}
 	
 	/**
