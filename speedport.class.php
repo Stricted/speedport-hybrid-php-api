@@ -207,7 +207,7 @@ class speedport {
 	 * @return	array
 	 */
 	public function getMissedCalls() {
-		$path = 'data/Syslog.json';
+		$path = 'data/ExportMissedCalls.json';
 		$fields = array('exporttype' => '1');
 		$cookie = 'challengev='.$this->challenge.'; '.$this->session;
 		$data = $this->sentRequest($path, $fields, $cookie);
@@ -225,8 +225,26 @@ class speedport {
 	 * @return	array
 	 */
 	public function getTakenCalls() {
-		$path = 'data/Syslog.json';
+		$path = 'data/ExportTakenCalls.json';
 		$fields = array('exporttype' => '2');
+		$cookie = 'challengev='.$this->challenge.'; '.$this->session;
+		$data = $this->sentRequest($path, $fields, $cookie);
+		
+		if (empty($data['body'])) {
+			throw new Exception('unable to get syslog data');
+		}
+		
+		return explode("\n", $data['body']);
+	}
+	
+	/**
+	 * get the Dialed Calls from router
+	 * 
+	 * @return	array
+	 */
+	public function getDialedCalls() {
+		$path = 'data/ExportDialedCalls.json';
+		$fields = array('exporttype' => '3');
 		$cookie = 'challengev='.$this->challenge.'; '.$this->session;
 		$data = $this->sentRequest($path, $fields, $cookie);
 		
