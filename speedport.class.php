@@ -220,6 +220,24 @@ class speedport {
 	}
 	
 	/**
+	 * get the Taken Calls from router
+	 * 
+	 * @return	array
+	 */
+	public function getTakenCalls() {
+		$path = 'data/Syslog.json';
+		$fields = array('exporttype' => '2');
+		$cookie = 'challengev='.$this->challenge.'; '.$this->session;
+		$data = $this->sentRequest($path, $fields, $cookie);
+		
+		if (empty($data['body'])) {
+			throw new Exception('unable to get syslog data');
+		}
+		
+		return explode("\n", $data['body']);
+	}
+	
+	/**
 	 * sends the request to router
 	 * 
 	 * @param	string	$path
