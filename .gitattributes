@@ -1,5 +1,1 @@
 *.php text eol=lf
-*.tpl text eol=lf
-*.js text eol=lf
-*.css text eol=lf
-*.sql text eol=lf

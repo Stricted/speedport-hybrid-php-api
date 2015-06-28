@@ -27,9 +27,10 @@ class speedport {
 	 * router url
 	 * @var	string
 	 */
-	private $url = 'http://speedport.ip/';
+	private $url = '';
 	
-	public function __construct ($password) {
+	public function __construct ($password, $url = 'http://speedport.ip/') {
+		$this->url = $url;
 		$this->getChallenge();
 		
 		if (empty($this->challenge)) {
@@ -47,9 +48,9 @@ class speedport {
 	 * Requests the password-challenge from the router.
 	 */
 	public function getChallenge () {
-		$url = 'data/Login.json';
+		$path = 'data/Login.json';
 		$fields = array('csrf_token' => 'nulltoken', 'showpw' => 0, 'challengev' => 'null');
-		$data = $this->sentRequest($url, $fields);
+		$data = $this->sentRequest($path, $fields);
 		$data = json_decode($data['body'], true);
 		if ($data[1]['varid'] == 'challengev') {
 			$this->challenge = $data[1]['varvalue'];
@@ -63,10 +64,10 @@ class speedport {
 	 * @return	boolean
 	 */
 	public function login ($password) {
-		$url = 'data/Login.json';
+		$path = 'data/Login.json';
 		$this->hash = hash('sha256', $this->challenge.':'.$password);
 		$fields = array('csrf_token' => 'nulltoken', 'showpw' => 0, 'password' => $this->hash);
-		$data = $this->sentRequest($url, $fields);
+		$data = $this->sentRequest($path, $fields);
 		$json = json_decode($data['body'], true);
 		if ($json[15]['varid'] == 'login' && $json[15]['varvalue'] == 'success') {
 			if (isset($data['header']['Set-Cookie']) && !empty($data['header']['Set-Cookie'])) {
@@ -91,9 +92,9 @@ class speedport {
 	 * @return	array
 	 */
 	public function logout () {
-		$url = 'data/Login.json';
+		$path = 'data/Login.json';
 		$fields = array('logout' => 'byby');
-		$data = $this->sentRequest($url, $fields);
+		$data = $this->sentRequest($path, $fields);
 		// reset challenge and session
 		$this->challenge = '';
 		$this->session = '';
@@ -109,10 +110,10 @@ class speedport {
 	 * @return	array
 	 */
 	public function reboot () {
-		$url = 'data/Reboot.json';
+		$path = 'data/Reboot.json';
 		$fields = array('csrf_token' => 'nulltoken', 'showpw' => 0, 'password' => $this->hash, 'reboot_device' => 'true');
 		$cookie = 'challengev='.$this->challenge.'; '.$this->session;
-		$data = $this->sentRequest($url, $fields, $cookie);
+		$data = $this->sentRequest($path, $fields, $cookie);
 		$json = json_decode($data['body'], true);
 		
 		return $json;
@@ -124,12 +125,12 @@ class speedport {
 	 * @param	string	$status
 	 */
 	public function changeConnectionStatus ($status) {
-		$url = 'data/Connect.json';
+		$path = 'data/Connect.json';
 		
 		if ($status == 'online' || $status == 'offline') {
 			$fields = array('csrf_token' => 'nulltoken', 'showpw' => 0, 'password' => $this->hash, 'req_connect' => $status);
 			$cookie = 'challengev='.$this->challenge.'; '.$this->session;
-			$this->sentRequest($url, $fields, $cookie);
+			$this->sentRequest($path, $fields, $cookie);
 		}
 		else {
 			throw new Exception();
@@ -168,10 +169,10 @@ class speedport {
 	 * @return	array
 	 */
 	public function getData ($file) {
-		$url = 'data/'.$file.'.json';
+		$path = 'data/'.$file.'.json';
 		$fields = array();
 		$cookie = 'challengev='.$this->challenge.'; '.$this->session;
-		$data = $this->sentRequest($url, $fields, $cookie);
+		$data = $this->sentRequest($path, $fields, $cookie);
 		
 		if (empty($data['body'])) {
 			throw new Exception('unable to get '.$file.' data');
@@ -185,13 +186,13 @@ class speedport {
 	/**
 	 * sends the request to router
 	 *
-	 * @param	string	$url
+	 * @param	string	$path
 	 * @param	array	$fields
 	 * @param	string	$cookie
 	 * @return	array
 	 */
-	private function sentRequest ($url, $fields = array(), $cookie = '') {
-		$url = $this->url.$url;
+	private function sentRequest ($path, $fields = array(), $cookie = '') {
+		$url = $this->url.$path;
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL, $url);
 		
