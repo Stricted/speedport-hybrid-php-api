@@ -295,9 +295,8 @@ class speedport {
 		// fix invalid json
 		$body = preg_replace("/(\r\n)|(\r)/", "\n", $body);
 		$body = preg_replace('/\'/i', '"', $body);
-		$body = preg_replace("/},\n\n]/", "}\n]", $body);
 		$body = preg_replace("/\[\s+\]/i", '[ {} ]', $body);
-		$body = preg_replace("/},\n\s+]/", "} ]", $body);
+		$body = preg_replace("/},\s+]/", "}\n]", $body);
 		
 		return array('header' => $this->parse_headers($header), 'body' => $body);
 	}
