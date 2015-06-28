@@ -29,6 +29,12 @@ class speedport {
 	 */
 	private $url = '';
 	
+	/**
+	 * derivedk cookie
+	 * @var	string
+	 */
+	private $derivedk = '';
+	
 	public function __construct ($password, $url = 'http://speedport.ip/') {
 		$this->url = $url;
 		$this->getChallenge();
@@ -78,6 +84,9 @@ class speedport {
 				else {
 					throw new Exception('unable to get the session cookie from the router');
 				}
+				
+				// calculate derivedk
+				$this->derivedk = hash_pbkdf2('sha1', hash('sha256', $password), substr($this->challenge, 0, 16), 1000, 32);
 				
 				return true;
 			}
@@ -255,6 +264,19 @@ class speedport {
 		return explode("\n", $data['body']);
 	}
 	
+	/*
+	// we cant encrypt and decrypt AES with mode CCM, we need AES with CCM mode for the commands
+	// (stupid, all other data are send as plaintext and some 'normal' data are encrypted...)
+	public function reconnectLte () {
+		$path = 'data/modules.json';
+		$fields = array('csrf_token' => 'nulltoken', 'showpw' => 0, 'password' => $this->hash, 'lte_reconn' => 'true');
+		$cookie = 'challengev='.$this->challenge.'; '.$this->session;
+		$data = $this->sentRequest($path, $fields, $cookie);
+		$json = json_decode($data['body'], true);
+		
+		return $json;
+	}
+	*/
 	/*
 	public function resetToFactoryDefault () {
 		$path = 'data/resetAllSetting.json';
