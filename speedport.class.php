@@ -119,6 +119,24 @@ class speedport {
 	}
 	
 	/**
+	 * change dsl connection status
+	 *
+	 * @param	string	$status
+	 */
+	public function changeConnectionStatus ($status) {
+		$url = 'data/Connect.json';
+		
+		if ($status == 'online' || $status == 'offline') {
+			$fields = array('csrf_token' => 'nulltoken', 'showpw' => 0, 'password' => $this->hash, 'req_connect' => $status);
+			$cookie = 'challengev='.$this->challenge.'; '.$this->session;
+			$this->sentRequest($url, $fields, $cookie);
+		}
+		else {
+			throw new Exception();
+		}
+	}
+	
+	/**
 	 * return the given json as array
 	 *
 	 * the following paths are known to be valid:
