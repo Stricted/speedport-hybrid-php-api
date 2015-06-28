@@ -247,13 +247,25 @@ class speedport {
 		$fields = array('exporttype' => '3');
 		$cookie = 'challengev='.$this->challenge.'; '.$this->session;
 		$data = $this->sentRequest($path, $fields, $cookie);
-		print_r($data);
+		
 		if (empty($data['body'])) {
 			throw new Exception('unable to get syslog data');
 		}
 		
 		return explode("\n", $data['body']);
 	}
+	
+	/*
+	public function resetToFactoryDefault () {
+		$path = 'data/resetAllSetting.json';
+		$fields = array('csrf_token' => 'nulltoken', 'showpw' => 0, 'password' => $this->hash, 'reset_all' => 'true');
+		$cookie = 'challengev='.$this->challenge.'; '.$this->session;
+		$data = $this->sentRequest($path, $fields, $cookie);
+		$json = json_decode($data['body'], true);
+		
+		return $json;
+	}
+	*/
 	
 	/**
 	 * check if firmware is actual
