@@ -59,7 +59,7 @@ class speedport {
 	
 	/**
 	 * login into the router with the given password
-	 *
+	 * 
 	 * @param	string	$password
 	 * @return	boolean
 	 */
@@ -88,7 +88,7 @@ class speedport {
 	
 	/**
 	 * logout
-	 *
+	 * 
 	 * @return	array
 	 */
 	public function logout () {
@@ -106,7 +106,7 @@ class speedport {
 	
 	/**
 	 * reboot the router
-	 *
+	 * 
 	 * @return	array
 	 */
 	public function reboot () {
@@ -121,7 +121,7 @@ class speedport {
 	
 	/**
 	 * change dsl connection status
-	 *
+	 * 
 	 * @param	string	$status
 	 */
 	public function changeConnectionStatus ($status) {
@@ -139,7 +139,7 @@ class speedport {
 	
 	/**
 	 * return the given json as array
-	 *
+	 * 
 	 * the following paths are known to be valid:
 	 * /data/dsl.json
 	 * /data/interfaces.json
@@ -162,9 +162,9 @@ class speedport {
 	 * /data/filterlist.json
 	 * /data/bonding_tr181.json
 	 * /data/letinfo.json
-	 *
+	 * 
 	 * /data/Status.json (No login needed)
-	 *
+	 * 
 	 * @param	string	$file
 	 * @return	array
 	 */
@@ -184,8 +184,26 @@ class speedport {
 	}
 	
 	/**
+	 * get the router syslog
+	 * 
+	 * @return	array
+	 */
+	public function getSyslog() {
+		$path = 'data/Syslog.json';
+		$fields = array('exporttype' => '0');
+		$cookie = 'challengev='.$this->challenge.'; '.$this->session;
+		$data = $this->sentRequest($path, $fields, $cookie);
+		
+		if (empty($data['body'])) {
+			throw new Exception('unable to get syslog data');
+		}
+		
+		return explode("\n", $data['body']);
+	}
+	
+	/**
 	 * sends the request to router
-	 *
+	 * 
 	 * @param	string	$path
 	 * @param	array	$fields
 	 * @param	string	$cookie
@@ -224,17 +242,15 @@ class speedport {
 		$body = preg_replace("/(\r\n)|(\r)/", "\n", $body);
 		$body = preg_replace('/\'/i', '"', $body);
 		$body = preg_replace("/},\n\n]/", "}\n]", $body);
-		$body = preg_replace('/\s+/', ' ', $body);
-		$body = preg_replace("/\[ \]/i", '[ {} ]', $body);
-		$body = preg_replace("/}, ]/", "} ]", $body);
-		$body = preg_replace("/\n/", " ", $body);
+		$body = preg_replace("/\[\s+\]/i", '[ {} ]', $body);
+		$body = preg_replace("/},\n\s+]/", "} ]", $body);
 		
 		return array('header' => $this->parse_headers($header), 'body' => $body);
 	}
 	
 	/**
 	 * parse the curl return header into an array
-	 *
+	 * 
 	 * @param	string	$response
 	 * @return	array
 	 */
