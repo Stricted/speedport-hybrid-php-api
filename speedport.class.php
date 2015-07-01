@@ -123,6 +123,7 @@ class speedport {
 		$fields = array('csrf_token' => 'nulltoken', 'showpw' => 0, 'password' => $this->hash, 'reboot_device' => 'true');
 		$cookie = 'challengev='.$this->challenge.'; '.$this->session;
 		$data = $this->sentRequest($path, $fields, $cookie);
+		
 		$json = json_decode($data['body'], true);
 		
 		return $json;
@@ -310,6 +311,52 @@ class speedport {
 	}
 	
 	/**
+	 * decrypt data from router
+	 * 
+	 * @param	string	$data
+	 * @return	array
+	 */
+	public function decrypt ($data) {
+		require_once 'CryptLib/CryptLib.php';
+		$factory = new CryptLib\Cipher\Factory();
+		$aes = $factory->getBlockCipher('rijndael-128');
+		
+		$iv = hex2bin(substr($this->challenge, 16, 16));
+		$adata = hex2bin(substr($this->challenge, 32, 16));
+		$dkey = hex2bin($this->derivedk);
+		$enc = hex2bin($data);
+		
+		$aes->setKey($dkey);
+		$mode = $factory->getMode('ccm', $aes, $iv, [ 'adata' => $adata, 'lSize' => 7]);
+		
+		$mode->decrypt($enc);
+		
+		return $mode->finish();
+	}
+
+	/**
+	 * decrypt data for the router
+	 * 
+	 * @param	array	$data
+	 * @return	string
+	 */
+	public function encrypt ($data) {
+		require_once 'CryptLib/CryptLib.php';
+		$factory = new CryptLib\Cipher\Factory();
+		$aes = $factory->getBlockCipher('rijndael-128');
+		
+		$iv = hex2bin(substr($this->challenge, 16, 16));
+		$adata = hex2bin(substr($this->challenge, 32, 16));
+		$dkey = hex2bin($this->derivedk);
+		
+		$aes->setKey($dkey);
+		$mode = $factory->getMode('ccm', $aes, $iv, [ 'adata' => $adata, 'lSize' => 7]);
+		$mode->encrypt(http_build_query($data));
+		
+		return $mode->finish();
+	}
+	
+	/**
 	 * sends the request to router
 	 * 
 	 * @param	string	$path
@@ -347,6 +394,7 @@ class speedport {
 		curl_close($ch);
 		
 		// fix invalid json
+		
 		$body = preg_replace("/(\r\n)|(\r)/", "\n", $body);
 		$body = preg_replace('/\'/i', '"', $body);
 		$body = preg_replace("/\[\s+\]/i", '[ {} ]', $body);
