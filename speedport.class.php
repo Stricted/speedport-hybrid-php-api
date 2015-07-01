@@ -12,6 +12,12 @@ class speedport {
 	private $challenge = '';
 	
 	/**
+	 * csrf_token
+	 * @var	string
+	 */
+	private $token = '';
+	
+	/**
 	 * hashed password
 	 * @var	string
 	 */
@@ -87,6 +93,9 @@ class speedport {
 				
 				// calculate derivedk
 				$this->derivedk = hash_pbkdf2('sha1', hash('sha256', $password), substr($this->challenge, 0, 16), 1000, 32);
+				
+				// get the csrf_token
+				$this->token = $this->getToken();
 				
 				return true;
 			}
@@ -265,20 +274,24 @@ class speedport {
 		return explode("\n", $data['body']);
 	}
 	
-	/*
-	// we cant encrypt and decrypt AES with mode CCM, we need AES with CCM mode for the commands
-	// (stupid, all other data are send as plaintext and some 'normal' data are encrypted...)
+	/**
+	 * reconnect LTE
+	 *
+	 * @return	array
+	 */
 	public function reconnectLte () {
 		$path = 'data/modules.json';
-		$fields = array('csrf_token' => 'nulltoken', 'showpw' => 0, 'password' => $this->hash, 'lte_reconn' => 'true');
+		$fields = array('csrf_token' => $this->token, 'lte_reconn' => '1');
+		$fields = $this->encrypt($fields);
 		$cookie = 'challengev='.$this->challenge.'; '.$this->session;
-		$data = $this->sentRequest($path, $fields, $cookie);
+		$data = $this->sentRequest($path, $fields, $cookie, 2);
 		$json = json_decode($data['body'], true);
 		
 		return $json;
 	}
-	*/
+	
 	/*
+	// i dont want test this :D, feel free to test it and report if it works or not
 	public function resetToFactoryDefault () {
 		$path = 'data/resetAllSetting.json';
 		$fields = array('csrf_token' => 'nulltoken', 'showpw' => 0, 'password' => $this->hash, 'reset_all' => 'true');
@@ -353,25 +366,32 @@ class speedport {
 		$mode = $factory->getMode('ccm', $aes, $iv, [ 'adata' => $adata, 'lSize' => 7]);
 		$mode->encrypt(http_build_query($data));
 		
-		return $mode->finish();
+		return bin2hex($mode->finish());
 	}
 	
 	/**
 	 * sends the request to router
 	 * 
 	 * @param	string	$path
-	 * @param	array	$fields
+	 * @param	mixed	$fields
 	 * @param	string	$cookie
+	 * @param	integer	$count
 	 * @return	array
 	 */
-	private function sentRequest ($path, $fields = array(), $cookie = '') {
+	private function sentRequest ($path, $fields, $cookie = '', $count = 0) {
 		$url = $this->url.$path;
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL, $url);
 		
 		if (!empty($fields)) {
-			curl_setopt($ch, CURLOPT_POST, count($fields));
-			curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($fields));
+			if (is_array($fields)) {
+				curl_setopt($ch, CURLOPT_POST, count($fields));
+				curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($fields));
+			}
+			else {
+				curl_setopt($ch, CURLOPT_POST, $count);
+				curl_setopt($ch, CURLOPT_POSTFIELDS, $fields);
+			}
 		}
 		
 		if (!empty($cookie)) {
@@ -401,6 +421,32 @@ class speedport {
 		$body = preg_replace("/},\s+]/", "}\n]", $body);
 		
 		return array('header' => $this->parse_headers($header), 'body' => $body);
+	}
+	
+	/**
+	 * get the csrf_token
+	 * 
+	 * @return	string
+	 */
+	private function getToken () {
+		$path = 'html/content/overview/index.html?lang=de';
+		$fields = array();
+		$cookie = 'challengev='.$this->challenge.'; '.$this->session;
+		$data = $this->sentRequest($path, $fields, $cookie);
+		
+		if (empty($data['body'])) {
+			throw new Exception('unable to get csrf_token');
+		}
+		
+		$a = explode('csrf_token = "', $data['body']);
+		$a = explode('";', $a[1]);
+		
+		if (isset($a[0]) && !empty($a[0])) {
+			return $a[0];
+		}
+		else {
+			throw new Exception('unable to get csrf_token');
+		}
 	}
 	
 	/**
