@@ -4,7 +4,7 @@
  * @license     GNU Lesser General Public License <http://opensource.org/licenses/lgpl-license.php>
  * @copyright   2015 Jan Altensen (Stricted)
  */
-class speedport {
+class SpeedPort {
 	/**
 	 * password-challenge
 	 * @var	string
@@ -402,7 +402,6 @@ class speedport {
 		
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($ch, CURLOPT_HEADER, true);
-		
 		
 		if ($cookie) {
 			
