@@ -167,31 +167,6 @@ class speedport {
 	/**
 	 * return the given json as array
 	 * 
-	 * the following paths are known to be valid:
-	 * /data/dsl.json
-	 * /data/interfaces.json
-	 * /data/arp.json
-	 * /data/session.json
-	 * /data/dhcp_client.json
-	 * /data/dhcp_server.json
-	 * /data/ipv6.json
-	 * /data/dns.json
-	 * /data/routing.json
-	 * /data/igmp_proxy.json
-	 * /data/igmp_snooping.json
-	 * /data/wlan.json
-	 * /data/module.json
-	 * /data/memory.json
-	 * /data/speed.json
-	 * /data/webdav.json
-	 * /data/bonding_client.json
-	 * /data/bonding_tunnel.json
-	 * /data/filterlist.json
-	 * /data/bonding_tr181.json
-	 * /data/letinfo.json
-	 * 
-	 * /data/Status.json (No login needed)
-	 * 
 	 * @param	string	$file
 	 * @return	array
 	 */
@@ -298,8 +273,12 @@ class speedport {
 		return $json;
 	}
 	
-	/*
-	// i dont want test this :D, feel free to test it and report if it works or not
+	/**
+	 * reset the router to Factory Default
+	 * not tested
+	 *
+	 * @return	array
+	 */
 	public function resetToFactoryDefault () {
 		$path = 'data/resetAllSetting.json';
 		$fields = array('csrf_token' => 'nulltoken', 'showpw' => 0, 'password' => $this->hash, 'reset_all' => 'true');
@@ -309,7 +288,7 @@ class speedport {
 		
 		return $json;
 	}
-	*/
+	
 	
 	/**
 	 * check if firmware is actual
@@ -482,7 +461,8 @@ class speedport {
 		$headers = array();
 		$header_text = substr($response, 0, strpos($response, "\r\n\r\n"));
 		
-		foreach (explode("\r\n", $header_text) as $i => $line) {
+		$header_text = explode("\r\n", $header_text);
+		foreach ($header_text as $i => $line) {
 			if ($i === 0) {
 				$headers['http_code'] = $line;
 			}

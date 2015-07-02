@@ -1,0 +1,17 @@
+language: php
+php:
+  - 5.3
+  - 5.4
+  - 5.5
+  - 5.6
+  - nightly
+allow_failures:
+    - php: nightly
+before_install:
+  - pear install pear/PHP_CodeSniffer
+  - phpenv rehash
+before_script:
+  - git clone --branch=master --depth=1 --quiet git://github.com/WoltLab/WCF.git WCF
+script:
+  - find . -type f -name '*.php' -not -path "./WCF/*" |xargs -I file php -l file  > /dev/null
+  - phpcs -p --extensions=php --standard="`pwd`/WCF/CodeSniff/WCF" --ignore="CryptLib/" --ignore="WCF/" .
