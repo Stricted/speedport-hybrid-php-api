@@ -64,7 +64,9 @@ class speedport {
 		$fields = array('csrf_token' => 'nulltoken', 'showpw' => 0, 'challengev' => 'null');
 		$data = $this->sentRequest($path, $fields);
 		$data = json_decode($data['body'], true);
-		if ($data[1]['varid'] == 'challengev') {
+		$data = $this->getValues($data);
+		
+		if (isset($data['challengev']) && !empty($data['challengev'])) {
 			$this->challenge = $data[1]['varvalue'];
 		}
 	}
@@ -81,7 +83,8 @@ class speedport {
 		$fields = array('csrf_token' => 'nulltoken', 'showpw' => 0, 'password' => $this->hash);
 		$data = $this->sentRequest($path, $fields);
 		$json = json_decode($data['body'], true);
-		if ($json[15]['varid'] == 'login' && $json[15]['varvalue'] == 'success') {
+		$json = $this->getValues($json);
+		if (isset($json['login']) && $json['login'] == 'success') {
 			if (isset($data['header']['Set-Cookie']) && !empty($data['header']['Set-Cookie'])) {
 				preg_match('/^.*(SessionID_R3=[a-z0-9]*).*/i', $data['header']['Set-Cookie'], $match);
 				if (isset($match[1]) && !empty($match[1])) {
@@ -116,6 +119,7 @@ class speedport {
 		// reset challenge and session
 		$this->challenge = '';
 		$this->session = '';
+		$this->token = "";
 		
 		$json = json_decode($data['body'], true);
 		
@@ -149,7 +153,11 @@ class speedport {
 		if ($status == 'online' || $status == 'offline') {
 			$fields = array('csrf_token' => 'nulltoken', 'showpw' => 0, 'password' => $this->hash, 'req_connect' => $status);
 			$cookie = 'challengev='.$this->challenge.'; '.$this->session;
-			$this->sentRequest($path, $fields, $cookie);
+			$data = $this->sentRequest($path, $fields, $cookie);
+			
+			$json = json_decode($this->decrypt($data['body']), true);
+			
+			return $json;
 		}
 		else {
 			throw new Exception();
@@ -329,7 +337,7 @@ class speedport {
 	 * @param	string	$data
 	 * @return	array
 	 */
-	public function decrypt ($data) {
+	private function decrypt ($data) {
 		require_once 'CryptLib/CryptLib.php';
 		$factory = new CryptLib\Cipher\Factory();
 		$aes = $factory->getBlockCipher('rijndael-128');
@@ -353,7 +361,7 @@ class speedport {
 	 * @param	array	$data
 	 * @return	string
 	 */
-	public function encrypt ($data) {
+	private function encrypt ($data) {
 		require_once 'CryptLib/CryptLib.php';
 		$factory = new CryptLib\Cipher\Factory();
 		$aes = $factory->getBlockCipher('rijndael-128');
@@ -367,6 +375,21 @@ class speedport {
 		$mode->encrypt(http_build_query($data));
 		
 		return bin2hex($mode->finish());
+	}
+	
+	/**
+	 * get the values from array
+	 * 
+	 * @param	array	$array
+	 * @return	array
+	 */
+	private function getValues($array) {
+		$data = array();
+		foreach ($array as $item) {
+			$data[$item['varid']] = $item['varvalue'];
+		}
+		
+		return $data;
 	}
 	
 	/**
