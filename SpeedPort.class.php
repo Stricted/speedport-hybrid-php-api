@@ -67,7 +67,7 @@ class SpeedPort {
 		$data = $this->getValues($data);
 		
 		if (isset($data['challengev']) && !empty($data['challengev'])) {
-			$this->challenge = $data[1]['varvalue'];
+			$this->challenge = $data['challengev'];
 		}
 	}
 	
