@@ -1,2 +1,4 @@
-/tests/config.php
-/tests/test.php
+tests/config.php
+tests/test.php
+.komodotools
+*.komodoproject
