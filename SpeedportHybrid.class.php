@@ -95,7 +95,14 @@ class SpeedportHybrid {
 				}
 				
 				// calculate derivedk
-				$this->derivedk = hash_pbkdf2('sha1', hash('sha256', $password), substr($this->challenge, 0, 16), 1000, 32);
+				if (version_compare(phpversion(), '5.5.0', '<')) {
+					require_once 'CryptLib/CryptLib.php';
+					$pbkdf2 = new CryptLib\Key\Derivation\PBKDF\PBKDF2();
+					$this->derivedk = $pbkdf2->derive(hash('sha256', $password), substr($this->challenge, 0, 16), 1000, 32);
+				}
+				else {
+					$this->derivedk = hash_pbkdf2('sha1', hash('sha256', $password), substr($this->challenge, 0, 16), 1000, 32);
+				}
 				
 				// get the csrf_token
 				$this->token = $this->getToken();
