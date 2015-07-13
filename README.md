@@ -33,3 +33,11 @@ known valid paths for getData() :
  * /data/bonding_tr181.json
  * /data/letinfo.json
  * /data/Status.json
+ 
+rrdtool integration
+=============
+
+![dsl status](assets/dsl-1h.png)
+![lte status](assets/lteinfo-1h.png)
+
+See the ```rrd``` directory for sample scripts.
