@@ -95,10 +95,11 @@ class SpeedportHybrid {
 				}
 				
 				// calculate derivedk
-				if (version_compare(phpversion(), '5.5.0', '<')) {
+				if (!function_exists("hash_pbkdf2")) {
 					require_once 'CryptLib/CryptLib.php';
-					$pbkdf2 = new CryptLib\Key\Derivation\PBKDF\PBKDF2();
-					$this->derivedk = $pbkdf2->derive(hash('sha256', $password), substr($this->challenge, 0, 16), 1000, 32);
+					$pbkdf2 = new CryptLib\Key\Derivation\PBKDF\PBKDF2(array('hash' => 'sha1'));
+					$this->derivedk = bin2hex($pbkdf2->derive(hash('sha256', $password), substr($this->challenge, 0, 16), 1000, 32));
+					$this->derivedk = substr($this->derivedk, 0, 32);
 				}
 				else {
 					$this->derivedk = hash_pbkdf2('sha1', hash('sha256', $password), substr($this->challenge, 0, 16), 1000, 32);
