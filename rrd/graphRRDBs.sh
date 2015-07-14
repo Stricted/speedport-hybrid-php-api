@@ -25,90 +25,89 @@ OUTPUTDIR=/var/www/stats
 # $2 - title
 # $3 - starttime
 # $4 - endtime
-function drawDSL
-{
-    rm -f $OUTPUTDIR/$1
+function drawDSL {
+	rm -f $OUTPUTDIR/$1
 
-    rrdtool graph $OUTPUTDIR/$1 \
-        -s $3 \
-        -e $4 \
-        -t "$2" \
-        -h 200 \
-        -w 600 \
-        -a PNG \
-        -v "Upstream / Downstream" \
+	rrdtool graph $OUTPUTDIR/$1 \
+		-s $3 \
+		-e $4 \
+		-t "$2" \
+		-h 200 \
+		-w 600 \
+		-a PNG \
+		-v "Upstream / Downstream" \
 		--upper-limit 16000 --rigid \
-        DEF:dactual=$DSLDB:dactual:AVERAGE \
-        DEF:dattainable=$DSLDB:dattainable:AVERAGE \
-        DEF:uactual=$DSLDB:uactual:AVERAGE \
-        DEF:uattainable=$DSLDB:uattainable:AVERAGE \
-        DEF:uLine=$DSLDB:uLine:AVERAGE \
-        DEF:dLine=$DSLDB:dLine:AVERAGE \
-        DEF:uSNR=$DSLDB:uSNR:AVERAGE \
-        DEF:dSNR=$DSLDB:dSNR:AVERAGE \
-        DEF:dHEC=$DSLDB:dHEC:MAX \
-        DEF:dCRC=$DSLDB:dCRC:MAX \
-        CDEF:dCRCScaled=dCRC,20000,* \
-        CDEF:dHECScaled=dHEC,20000,* \
-        CDEF:uLineScaled=uLine,10,* \
-        CDEF:dLineScaled=dLine,10,* \
-        CDEF:uSNRScaled=uSNR,80,* \
-        CDEF:dSNRScaled=dSNR,80,* \
-        CDEF:dHECOutline=dHECScaled,dCRCScaled,dHECScaled,+,UNKN,IF \
-        \
+		DEF:dactual=$DSLDB:dactual:AVERAGE \
+		DEF:dattainable=$DSLDB:dattainable:AVERAGE \
+		DEF:uactual=$DSLDB:uactual:AVERAGE \
+		DEF:uattainable=$DSLDB:uattainable:AVERAGE \
+		DEF:uLine=$DSLDB:uLine:AVERAGE \
+		DEF:dLine=$DSLDB:dLine:AVERAGE \
+		DEF:uSNR=$DSLDB:uSNR:AVERAGE \
+		DEF:dSNR=$DSLDB:dSNR:AVERAGE \
+		DEF:dHEC=$DSLDB:dHEC:MAX \
+		DEF:dCRC=$DSLDB:dCRC:MAX \
+		CDEF:dCRCScaled=dCRC,20000,* \
+		CDEF:dHECScaled=dHEC,20000,* \
+		CDEF:uLineScaled=uLine,10,* \
+		CDEF:dLineScaled=dLine,10,* \
+		CDEF:uSNRScaled=uSNR,80,* \
+		CDEF:dSNRScaled=dSNR,80,* \
+		CDEF:dHECOutline=dHECScaled,dCRCScaled,dHECScaled,+,UNKN,IF \
+		\
 		COMMENT:" \t\t\t" \
 		COMMENT:"Cur\: \t\t" \
 		COMMENT:"Min\: \t\t" \
 		COMMENT:"Avg\: \t\t" \
 		COMMENT:"Max\: \n" \
 		\
-        AREA:dattainable#54EC48CC \
-        LINE1:dattainable#24BC14:"dattainable\t\t"  \
+		AREA:dattainable#54EC48CC \
+		LINE1:dattainable#24BC14:"dattainable\t\t"  \
 		GPRINT:dattainable:LAST:"%1.0lf kBps\t" \
 		GPRINT:dattainable:MIN:"%1.0lf kBps\t" \
 		GPRINT:dattainable:AVERAGE:"%1.0lf kBps\t" \
 		GPRINT:dattainable:MAX:"%1.0lf kBps\n" \
 		\
-        LINE1:dactual#ff3535:"dactual\t\t" \
+		LINE1:dactual#ff3535:"dactual\t\t" \
 		GPRINT:dactual:LAST:"%1.0lf kBps\t" \
 		GPRINT:dactual:MIN:"%1.0lf kBps\t" \
 		GPRINT:dactual:AVERAGE:"%1.0lf kBps\t" \
 		GPRINT:dactual:MAX:"%1.0lf kBps\n" \
 		\
-        AREA:uattainable#48C4EC \
-        LINE1:uattainable#1598C3:"uattainable\t\t" \
+		AREA:uattainable#48C4EC \
+		LINE1:uattainable#1598C3:"uattainable\t\t" \
 		GPRINT:uattainable:LAST:"%1.0lf kBps\t" \
 		GPRINT:uattainable:MIN:"%1.0lf kBps\t" \
 		GPRINT:uattainable:AVERAGE:"%1.0lf kBps\t" \
 		GPRINT:uattainable:MAX:"%1.0lf kBps\n" \
 		\
-        LINE1:uactual#0000FF:"uactual\t\t"  \
+		LINE1:uactual#0000FF:"uactual\t\t"  \
 		GPRINT:uactual:LAST:"%1.0lf kBps\t" \
 		GPRINT:uactual:MIN:"%1.0lf kBps\t" \
 		GPRINT:uactual:AVERAGE:"%1.0lf kBps\t" \
 		GPRINT:uactual:MAX:"%1.0lf kBps\n" \
 		\
-        AREA:dHECScaled#EC9D48AA:"Header Errors\t" \
+		AREA:dHECScaled#EC9D48AA:"Header Errors\t" \
 		GPRINT:dHEC:LAST:"%1.0lf \t\t" \
 		GPRINT:dHEC:MIN:"%1.0lf \t\t" \
 		GPRINT:dHEC:AVERAGE:"%1.0lf \t\t" \
 		GPRINT:dHEC:MAX:"%1.0lf \n" \
 		\
-        AREA:dCRCScaled#ECD748AA:"CRC Errors\t\t":STACK \
-        LINE1:dHECScaled#CC7016AA  \
-        LINE1:dHECOutline#C9B215AA \
+		AREA:dCRCScaled#ECD748AA:"CRC Errors\t\t":STACK \
+		LINE1:dHECScaled#CC7016AA  \
+		LINE1:dHECOutline#C9B215AA \
 		GPRINT:dCRC:LAST:"%1.0lf \t\t" \
 		GPRINT:dCRC:MIN:"%1.0lf \t\t" \
 		GPRINT:dCRC:AVERAGE:"%1.0lf \t\t" \
 		GPRINT:dCRC:MAX:"%1.0lf \n" \
 		\
-        LINE1:uSNRScaled#DE48EC:"uSNR\t\t\t" \
+		LINE1:uSNRScaled#DE48EC:"uSNR\t\t\t" \
 		GPRINT:uSNR:LAST:"%1.0lf \t\t" \
 		GPRINT:uSNR:MIN:"%1.0lf \t\t" \
 		GPRINT:uSNR:AVERAGE:"%1.0lf \t\t" \
 		GPRINT:uSNR:MAX:"%1.0lf \n" \
 		\
-        LINE1:dSNRScaled#B415C7:"dSNR\t\t\t" \
+		LINE1:dSNRScaled#B415C7:"dSNR\t\t\t" \
 		GPRINT:dSNR:LAST:"%1.0lf \t\t" \
 		GPRINT:dSNR:MIN:"%1.0lf \t\t" \
 		GPRINT:dSNR:AVERAGE:"%1.0lf \t\t" \
@@ -124,10 +123,7 @@ function drawDSL
 		GPRINT:dLine:LAST:"%1.0lf \t\t" \
 		GPRINT:dLine:MIN:"%1.0lf \t\t" \
 		GPRINT:dLine:AVERAGE:"%1.0lf \t\t" \
-		GPRINT:dLine:MAX:"%1.0lf \n" \
-		
-		
-	
+		GPRINT:dLine:MAX:"%1.0lf \n"
 }
 
 # Graph LTE values
@@ -136,9 +132,8 @@ function drawDSL
 # $2 - title
 # $3 - starttime
 # $4 - endtime
-function drawLTE
-{
-    rm -f $OUTPUTDIR/$1
+function drawLTE {
+	rm -f $OUTPUTDIR/$1
 
 	rrdtool graph $OUTPUTDIR/$1 \
 		-s $3 \
@@ -147,11 +142,11 @@ function drawLTE
 		-h 200 \
 		-w 548 \
 		-a PNG \
-		-v "rsrq" \
+		-v "rsrp" \
 		--right-axis 0.1:0 \
-		--right-axis-label "rsrp" \
-		DEF:rsrp=$LTEDB:rsrp:AVERAGE \
+		--right-axis-label "rsrq" \
 		DEF:rsrq=$LTEDB:rsrq:AVERAGE \
+		DEF:rsrp=$LTEDB:rsrp:AVERAGE \
 		CDEF:rsrqScaled=rsrq,10,* \
 		\
 		COMMENT:" \t\t\t" \
@@ -159,18 +154,20 @@ function drawLTE
 		COMMENT:"Min\: \t\t" \
 		COMMENT:"Avg\: \t\t" \
 		COMMENT:"Max\: \n" \
-		AREA:rsrqScaled#48C4EC \
-		LINE1:rsrqScaled#1598C3:"rsrq\t\t\t" \
-    	GPRINT:rsrq:LAST:"%1.0lf dB\t\t" \
-    	GPRINT:rsrq:MAX:"%1.0lf dB\t\t" \
-    	GPRINT:rsrq:AVERAGE:"%1.0lf dB\t\t" \
-    	GPRINT:rsrq:MIN:"%1.0lf dB\n" \
+		\
 		AREA:rsrp#54EC48CC \
 		LINE1:rsrp#24BC14:"rsrp \t\t\t"  \
-    	GPRINT:rsrp:LAST:"%1.0lf dB\t\t" \
-    	GPRINT:rsrp:MAX:"%1.0lf dB\t\t" \
-        GPRINT:rsrp:AVERAGE:"%1.0lf dB\t\t" \
-    	GPRINT:rsrp:MIN:"%1.0lf dB\n"
+		GPRINT:rsrp:LAST:"%1.0lf dB\t\t" \
+		GPRINT:rsrp:MAX:"%1.0lf dB\t\t" \
+		GPRINT:rsrp:AVERAGE:"%1.0lf dB\t\t" \
+		GPRINT:rsrp:MIN:"%1.0lf dB\n" \
+		\
+		AREA:rsrqScaled#48C4EC \
+		LINE1:rsrqScaled#1598C3:"rsrq\t\t\t" \
+		GPRINT:rsrq:LAST:"%1.0lf dB\t\t" \
+		GPRINT:rsrq:MAX:"%1.0lf dB\t\t" \
+		GPRINT:rsrq:AVERAGE:"%1.0lf dB\t\t" \
+		GPRINT:rsrq:MIN:"%1.0lf dB\n"
 }
 
 drawDSL dsl-1h.png "DSL line status - 1 hour" end-1h now &
