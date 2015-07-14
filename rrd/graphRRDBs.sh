@@ -155,19 +155,19 @@ function drawLTE {
 		COMMENT:"Avg\: \t\t" \
 		COMMENT:"Max\: \n" \
 		\
-		AREA:rsrp#54EC48CC \
-		LINE1:rsrp#24BC14:"rsrp \t\t\t"  \
-		GPRINT:rsrp:LAST:"%1.0lf dB\t\t" \
-		GPRINT:rsrp:MAX:"%1.0lf dB\t\t" \
-		GPRINT:rsrp:AVERAGE:"%1.0lf dB\t\t" \
-		GPRINT:rsrp:MIN:"%1.0lf dB\n" \
-		\
 		AREA:rsrqScaled#48C4EC \
 		LINE1:rsrqScaled#1598C3:"rsrq\t\t\t" \
 		GPRINT:rsrq:LAST:"%1.0lf dB\t\t" \
 		GPRINT:rsrq:MAX:"%1.0lf dB\t\t" \
 		GPRINT:rsrq:AVERAGE:"%1.0lf dB\t\t" \
-		GPRINT:rsrq:MIN:"%1.0lf dB\n"
+		GPRINT:rsrq:MIN:"%1.0lf dB\n" \
+		\
+		AREA:rsrp#54EC48CC \
+		LINE1:rsrp#24BC14:"rsrp \t\t\t"  \
+		GPRINT:rsrp:LAST:"%1.0lf dB\t\t" \
+		GPRINT:rsrp:MAX:"%1.0lf dB\t\t" \
+		GPRINT:rsrp:AVERAGE:"%1.0lf dB\t\t" \
+		GPRINT:rsrp:MIN:"%1.0lf dB\n" 
 }
 
 drawDSL dsl-1h.png "DSL line status - 1 hour" end-1h now &
