@@ -2,4 +2,3 @@ tests/config.php
 tests/test.php
 .komodotools
 *.komodoproject
-rrd.php
