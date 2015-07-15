@@ -34,6 +34,12 @@ known valid paths for getData() :
  * data/letinfo.json
  * data/Status.json
  
+PHP requirements
+============= 
+ * PHP >= 5.4.0
+ * PHP extension `rrd` (for rrd graphs)
+ * PHP extension `mcrypt`
+
 rrdtool integration
 =============
 
