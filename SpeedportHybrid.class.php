@@ -108,11 +108,38 @@ class SpeedportHybrid {
 				// get the csrf_token
 				$this->token = $this->getToken();
 				
-				return true;
+				if ($this->checkLogin() === true) {
+					return true;
+				}
 			}
 		}
 		
 		return false;
+	}
+	
+	/**
+	 * check if we are logged in
+	 *
+	 * @return boolean
+	 */
+	public function checkLogin () {
+		$path = 'data/'.$file.'.json';
+		$fields = array();
+		$cookie = 'challengev='.$this->challenge.'; '.$this->session;
+		$data = $this->sentRequest($path, $fields, $cookie);
+		
+		if (empty($data['body'])) {
+			throw new Exception('unable to get '.$file.' data');
+		}
+		
+		$json = json_decode($data['body'], true);
+		$json = $this->getValues($json);
+		
+		if ($json['loginstate'] != 1) {
+			return false;
+		}
+		
+		return true;
 	}
 	
 	/**
@@ -122,16 +149,22 @@ class SpeedportHybrid {
 	 */
 	public function logout () {
 		$path = 'data/Login.json';
-		$fields = array('logout' => 'byby');
-		$data = $this->sentRequest($path, $fields);
-		// reset challenge and session
-		$this->challenge = '';
-		$this->session = '';
-		$this->token = "";
-		
-		$json = json_decode($data['body'], true);
-		
-		return $json;
+		$fields = array('csrf_token' =>  $this->token, 'logout' => 'byby');
+		$cookie = 'challengev='.$this->challenge.'; '.$this->session;
+		$data = $this->sentRequest($path, $fields, $cookie);
+		if ($this->checkLogin() === false) {
+			// reset challenge and session
+			$this->challenge = '';
+			$this->session = '';
+			$this->token = "";
+			
+			$json = json_decode($data['body'], true);
+			
+			return $json;
+		}
+		else {
+			throw new Exception('logout failed');
+		}
 	}
 	
 	/**
