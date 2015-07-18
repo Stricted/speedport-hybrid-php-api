@@ -416,7 +416,7 @@ class SpeedportHybrid {
 	 * @return	array
 	 */
 	private function sentRequest ($path, $fields, $cookie = false, $count = 0) {
-		$url = $this->url.$path;
+		$url = $this->url.$path.'?lang=en';
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL, $url);
 		
@@ -450,7 +450,6 @@ class SpeedportHybrid {
 		curl_close($ch);
 		
 		// fix invalid json
-		
 		$body = preg_replace("/(\r\n)|(\r)/", "\n", $body);
 		$body = preg_replace('/\'/i', '"', $body);
 		$body = preg_replace("/\[\s+\]/i", '[ {} ]', $body);
@@ -467,7 +466,7 @@ class SpeedportHybrid {
 	private function getToken () {
 		if ($this->checkLogin() !== true) throw new Exception('you musst be logged in to use this method');
 		
-		$path = 'html/content/overview/index.html?lang=de';
+		$path = 'html/content/overview/index.html';
 		$fields = array();
 		$data = $this->sentRequest($path, $fields, true);
 		
