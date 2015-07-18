@@ -46,8 +46,8 @@ if (!file_exists($path.'lteinfo.rrd')) {
 }
 
 require_once('../SpeedportHybrid.class.php');
-$sp = new SpeedportHybrid($password, $url);
-
+$sp = new SpeedportHybrid($url);
+$sp->login($password);
 $data = $sp->getData('dsl');
 $options = array(time().':'.$data['Line']['uactual'].':'.$data['Line']['dactual'].':'.$data['Line']['uattainable'].':'.$data['Line']['dattainable'].':'.$data['Line']['uSNR'].':'.$data['Line']['dSNR'].':'.$data['Line']['uSignal'].':'.$data['Line']['dSignal'].':'.$data['Line']['uLine'].':'.$data['Line']['dLine'].':'.$data['Line']['uCRC'].':'.$data['Line']['dCRC'].':'.$data['Line']['uHEC'].':'.$data['Line']['dHEC'].':'.$data['Line']['uFEC'].':'.$data['Line']['dFEC']);
 rrd_update($path.'dsl.rrd', $options);
