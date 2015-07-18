@@ -6,6 +6,12 @@
  */
 class SpeedportHybrid {
 	/**
+	 *
+	 *
+	 */
+	const VERSION = '1.0.2';
+	
+	/**
 	 * password-challenge
 	 * @var	string
 	 */
@@ -118,10 +124,13 @@ class SpeedportHybrid {
 	 * @return boolean
 	 */
 	public function checkLogin () {
+		if (empty($this->challenge) && empty($this->session)) {
+			return false;
+		}
+		
 		$path = 'data/SecureStatus.json';
 		$fields = array();
-		$cookie = 'challengev='.$this->challenge.'; '.$this->session;
-		$data = $this->sentRequest($path, $fields, $cookie);
+		$data = $this->sentRequest($path, $fields, true);
 		
 		if (empty($data['body'])) {
 			throw new Exception('unable to get SecureStatus data');
@@ -147,8 +156,7 @@ class SpeedportHybrid {
 		
 		$path = 'data/Login.json';
 		$fields = array('csrf_token' =>  $this->token, 'logout' => 'byby');
-		$cookie = 'challengev='.$this->challenge.'; '.$this->session;
-		$data = $this->sentRequest($path, $fields, $cookie);
+		$data = $this->sentRequest($path, $fields, true);
 		if ($this->checkLogin() === false) {
 			// reset challenge and session
 			$this->challenge = '';
@@ -174,8 +182,7 @@ class SpeedportHybrid {
 		
 		$path = 'data/Reboot.json';
 		$fields = array('csrf_token' => 'nulltoken', 'showpw' => 0, 'password' => $this->hash, 'reboot_device' => 'true');
-		$cookie = 'challengev='.$this->challenge.'; '.$this->session;
-		$data = $this->sentRequest($path, $fields, $cookie);
+		$data = $this->sentRequest($path, $fields, true);
 		
 		$json = json_decode($data['body'], true);
 		
@@ -194,8 +201,7 @@ class SpeedportHybrid {
 		
 		if ($status == 'online' || $status == 'offline') {
 			$fields = array('csrf_token' => 'nulltoken', 'showpw' => 0, 'password' => $this->hash, 'req_connect' => $status);
-			$cookie = 'challengev='.$this->challenge.'; '.$this->session;
-			$data = $this->sentRequest($path, $fields, $cookie);
+			$data = $this->sentRequest($path, $fields, true);
 			
 			$json = json_decode($this->decrypt($data['body']), true);
 			
@@ -213,12 +219,11 @@ class SpeedportHybrid {
 	 * @return	array
 	 */
 	public function getData ($file) {
-		if ($this->checkLogin() !== true) throw new Exception('you musst be logged in to use this method');
+		if ($this->checkLogin() !== true && $file != "Status") throw new Exception('you musst be logged in to use this method');
 		
 		$path = 'data/'.$file.'.json';
 		$fields = array();
-		$cookie = 'challengev='.$this->challenge.'; '.$this->session;
-		$data = $this->sentRequest($path, $fields, $cookie);
+		$data = $this->sentRequest($path, $fields, true);
 		
 		if (empty($data['body'])) {
 			throw new Exception('unable to get '.$file.' data');
@@ -235,18 +240,7 @@ class SpeedportHybrid {
 	 * @return	array
 	 */
 	public function getSyslog() {
-		if ($this->checkLogin() !== true) throw new Exception('you musst be logged in to use this method');
-		
-		$path = 'data/Syslog.json';
-		$fields = array('exporttype' => '0');
-		$cookie = 'challengev='.$this->challenge.'; '.$this->session;
-		$data = $this->sentRequest($path, $fields, $cookie);
-		
-		if (empty($data['body'])) {
-			throw new Exception('unable to get syslog data');
-		}
-		
-		return explode("\n", $data['body']);
+		return $this->exportData('0');
 	}
 	
 	/**
@@ -255,18 +249,7 @@ class SpeedportHybrid {
 	 * @return	array
 	 */
 	public function getMissedCalls() {
-		if ($this->checkLogin() !== true) throw new Exception('you musst be logged in to use this method');
-		
-		$path = 'data/ExportMissedCalls.json';
-		$fields = array('exporttype' => '1');
-		$cookie = 'challengev='.$this->challenge.'; '.$this->session;
-		$data = $this->sentRequest($path, $fields, $cookie);
-		
-		if (empty($data['body'])) {
-			throw new Exception('unable to get syslog data');
-		}
-		
-		return explode("\n", $data['body']);
+		return $this->exportData('1');
 	}
 	
 	/**
@@ -275,18 +258,7 @@ class SpeedportHybrid {
 	 * @return	array
 	 */
 	public function getTakenCalls() {
-		if ($this->checkLogin() !== true) throw new Exception('you musst be logged in to use this method');
-		
-		$path = 'data/ExportTakenCalls.json';
-		$fields = array('exporttype' => '2');
-		$cookie = 'challengev='.$this->challenge.'; '.$this->session;
-		$data = $this->sentRequest($path, $fields, $cookie);
-		
-		if (empty($data['body'])) {
-			throw new Exception('unable to get syslog data');
-		}
-		
-		return explode("\n", $data['body']);
+		return $this->exportData('2');
 	}
 	
 	/**
@@ -295,15 +267,23 @@ class SpeedportHybrid {
 	 * @return	array
 	 */
 	public function getDialedCalls() {
+		return $this->exportData('3');
+	}
+	
+	/**
+	 * export data from router
+	 * 
+	 * @return	array
+	 */
+	private function exportData ($type) {
 		if ($this->checkLogin() !== true) throw new Exception('you musst be logged in to use this method');
 		
 		$path = 'data/ExportDialedCalls.json';
-		$fields = array('exporttype' => '3');
-		$cookie = 'challengev='.$this->challenge.'; '.$this->session;
-		$data = $this->sentRequest($path, $fields, $cookie);
+		$fields = array('exporttype' => $type);
+		$data = $this->sentRequest($path, $fields, true);
 		
 		if (empty($data['body'])) {
-			throw new Exception('unable to get syslog data');
+			throw new Exception('unable to get export data');
 		}
 		
 		return explode("\n", $data['body']);
@@ -320,8 +300,7 @@ class SpeedportHybrid {
 		$path = 'data/modules.json';
 		$fields = array('csrf_token' => $this->token, 'lte_reconn' => '1');
 		$fields = $this->encrypt($fields);
-		$cookie = 'challengev='.$this->challenge.'; '.$this->session;
-		$data = $this->sentRequest($path, $fields, $cookie, 2);
+		$data = $this->sentRequest($path, $fields, true, 2);
 		$json = json_decode($data['body'], true);
 		
 		return $json;
@@ -338,8 +317,7 @@ class SpeedportHybrid {
 		
 		$path = 'data/resetAllSetting.json';
 		$fields = array('csrf_token' => 'nulltoken', 'showpw' => 0, 'password' => $this->hash, 'reset_all' => 'true');
-		$cookie = 'challengev='.$this->challenge.'; '.$this->session;
-		$data = $this->sentRequest($path, $fields, $cookie);
+		$data = $this->sentRequest($path, $fields, true);
 		$json = json_decode($data['body'], true);
 		
 		return $json;
@@ -356,8 +334,7 @@ class SpeedportHybrid {
 		
 		$path = 'data/checkfirmware.json';
 		$fields = array('checkfirmware' => 'true');
-		$cookie = 'challengev='.$this->challenge.'; '.$this->session;
-		$data = $this->sentRequest($path, $fields, $cookie);
+		$data = $this->sentRequest($path, $fields, true);
 		
 		if (empty($data['body'])) {
 			throw new Exception('unable to get checkfirmware data');
@@ -438,7 +415,7 @@ class SpeedportHybrid {
 	 * @param	integer	$count
 	 * @return	array
 	 */
-	private function sentRequest ($path, $fields, $cookie = '', $count = 0) {
+	private function sentRequest ($path, $fields, $cookie = false, $count = 0) {
 		$url = $this->url.$path;
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL, $url);
@@ -454,8 +431,8 @@ class SpeedportHybrid {
 			}
 		}
 		
-		if (!empty($cookie)) {
-			curl_setopt($ch, CURLOPT_COOKIE, $cookie);
+		if ($cookie === true) {
+			curl_setopt($ch, CURLOPT_COOKIE, 'challengev='.$this->challenge.'; '.$this->session);
 		}
 		
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -492,8 +469,7 @@ class SpeedportHybrid {
 		
 		$path = 'html/content/overview/index.html?lang=de';
 		$fields = array();
-		$cookie = 'challengev='.$this->challenge.'; '.$this->session;
-		$data = $this->sentRequest($path, $fields, $cookie);
+		$data = $this->sentRequest($path, $fields, true);
 		
 		if (empty($data['body'])) {
 			throw new Exception('unable to get csrf_token');
