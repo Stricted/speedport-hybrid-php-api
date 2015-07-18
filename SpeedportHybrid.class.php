@@ -123,7 +123,7 @@ class SpeedportHybrid {
 	 * @return boolean
 	 */
 	public function checkLogin () {
-		$path = 'data/'.$file.'.json';
+		$path = 'data/SecureStatus.json';
 		$fields = array();
 		$cookie = 'challengev='.$this->challenge.'; '.$this->session;
 		$data = $this->sentRequest($path, $fields, $cookie);
