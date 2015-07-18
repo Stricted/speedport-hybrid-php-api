@@ -124,7 +124,7 @@ class SpeedportHybrid {
 		$data = $this->sentRequest($path, $fields, $cookie);
 		
 		if (empty($data['body'])) {
-			throw new Exception('unable to get '.$file.' data');
+			throw new Exception('unable to get SecureStatus data');
 		}
 		
 		$json = json_decode($data['body'], true);
