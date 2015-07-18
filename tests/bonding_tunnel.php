@@ -1,4 +1,4 @@
 <?php
 require_once('config.php');
-print_r($sp->getData('bonding_tunnel'));
+print_r($sp->getBondingTunnel());
 $sp->logout();

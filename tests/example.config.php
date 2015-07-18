@@ -1,6 +1,6 @@
 <?php
-require_once('../SpeedportHybrid.class.php');
+require_once('Data.class.php');
 $password = 'your_router_password';
 $url = 'http://speedport.ip/';
-$sp = new SpeedportHybrid($url);
+$sp = new Data($url);
 $sp->login($password);

@@ -1,4 +1,4 @@
 <?php
 require_once('config.php');
-print_r($sp->getData('igmp_snooping'));
+print_r($sp->getIGMPSnooping());
 $sp->logout();

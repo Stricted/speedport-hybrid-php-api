@@ -1,4 +1,4 @@
 <?php
 require_once('config.php');
-print_r($sp->getData('filterlist'));
+print_r($sp->getFilterList());
 $sp->logout();

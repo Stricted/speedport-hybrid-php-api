@@ -1,4 +1,4 @@
 <?php
 require_once('config.php');
-print_r($sp->getData('dhcp_client'));
+print_r($sp->getDHCPClient());
 $sp->logout();

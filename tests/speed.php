@@ -1,4 +1,4 @@
 <?php
 require_once('config.php');
-print_r($sp->getData('speed'));
+print_r($sp->getSpeed());
 $sp->logout();

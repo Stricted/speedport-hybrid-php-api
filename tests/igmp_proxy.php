@@ -1,4 +1,4 @@
 <?php
 require_once('config.php');
-print_r($sp->getData('igmp_proxy'));
+print_r($sp->getIGMPProxy());
 $sp->logout();

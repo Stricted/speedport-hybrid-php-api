@@ -278,7 +278,7 @@ class SpeedportHybrid {
 	private function exportData ($type) {
 		if ($this->checkLogin() !== true) throw new Exception('you musst be logged in to use this method');
 		
-		$path = 'data/ExportDialedCalls.json';
+		$path = 'data/Syslog.json';
 		$fields = array('exporttype' => $type);
 		$data = $this->sentRequest($path, $fields, true);
 		
