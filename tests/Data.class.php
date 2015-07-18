@@ -7,90 +7,90 @@ require_once('../SpeedportHybrid.class.php');
  */
 class Data extends SpeedportHybrid {
 	public function getDSL () {
-		return $this->getData('data/dsl.json');
+		return $this->getData('dsl');
 	}
 	
 	public function getInterfaces () {
-		return $this->getData('data/interfaces.json');
+		return $this->getData('interfaces');
 	}
 	
 	public function getArp () {
-		return $this->getData('data/arp.json');
+		return $this->getData('arp');
 	}
 	
 	public function getSession () {
-		return $this->getData('data/session.json');
+		return $this->getData('session');
 	}
 	
 	public function getDHCPClient () {
-		return $this->getData('data/dhcp_client.json');
+		return $this->getData('dhcp_client');
 	}
 	
 	public function getDHCPServer () {
-		return $this->getData('data/dhcp_server.json');
+		return $this->getData('dhcp_server');
 	}
 	
 	public function getIPv6 () {
-		return $this->getData('data/ipv6.json');
+		return $this->getData('ipv6');
 	}
 	
 	public function getDNS () {
-		return $this->getData('data/dns.json');
+		return $this->getData('dns');
 	}
 	
 	public function getRouting () {
-		return $this->getData('data/routing.json');
+		return $this->getData('routing');
 	}
 	
 	public function getIGMPProxy () {
-		return $this->getData('data/igmp_proxy.json');
+		return $this->getData('igmp_proxy');
 	}
 	
 	public function getIGMPSnooping () {
-		return $this->getData('data/igmp_snooping.json');
+		return $this->getData('igmp_snooping');
 	}
 	
 	public function getWLAN () {
-		return $this->getData('data/wlan.json');
+		return $this->getData('wlan');
 	}
 	
 	public function getModule () {
-		return $this->getData('data/module.json');
+		return $this->getData('module');
 	}
 	
 	public function getMemory () {
-		return $this->getData('data/memory.json');
+		return $this->getData('memory');
 	}
 	
 	public function getSpeed () {
-		return $this->getData('data/speed.json');
+		return $this->getData('speed');
 	}
 	
 	public function getWebDAV () {
-		return $this->getData('data/webdav.json');
+		return $this->getData('webdav');
 	}
 	
 	public function getBondingClient () {
-		return $this->getData('data/bonding_client.json');
+		return $this->getData('bonding_client');
 	}
 	
 	public function getBondingTunnel () {
-		return $this->getData('data/bonding_tunnel.json');
+		return $this->getData('bonding_tunnel');
 	}
 	
 	public function getFilterList () {
-		return $this->getData('data/filterlist.json');
+		return $this->getData('filterlist');
 	}
 	
 	public function getBondingTR181 () {
-		return $this->getData('data/bonding_tr181.json');
+		return $this->getData('bonding_tr181');
 	}
 	
 	public function getLTEInfo () {
-		return $this->getData('data/letinfo.json');
+		return $this->getData('letinfo');
 	}
 	
 	public function getStatus () {
-		return $this->getData('data/Status.json');
+		return $this->getData('Status');
 	}
 }
