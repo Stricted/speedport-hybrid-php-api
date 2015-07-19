@@ -1,4 +1,7 @@
 <?php
+require_once('RebootException.class.php');
+require_once('RouterException.class.php');
+
 /**
  * @author      Jan Altensen (Stricted)
  * @license     GNU Lesser General Public License <http://opensource.org/licenses/lgpl-license.php>
@@ -76,7 +79,7 @@ class SpeedportHybrid {
 		$this->getChallenge();
 		
 		if (empty($this->challenge)) {
-			throw new Exception('unable to get the challenge from the router');
+			throw new RouterExeption('unable to get the challenge from the router');
 		}
 		
 		$path = 'data/Login.json';
@@ -92,7 +95,7 @@ class SpeedportHybrid {
 					$this->session = $match[1];
 				}
 				else {
-					throw new Exception('unable to get the session cookie from the router');
+					throw new RouterExeption('unable to get the session cookie from the router');
 				}
 				
 				// calculate derivedk
@@ -133,7 +136,7 @@ class SpeedportHybrid {
 		$data = $this->sentRequest($path, $fields, true);
 		
 		if (empty($data['body'])) {
-			throw new Exception('unable to get SecureStatus data');
+			throw new RouterExeption('unable to get SecureStatus data');
 		}
 		
 		$json = json_decode($data['body'], true);
@@ -152,7 +155,7 @@ class SpeedportHybrid {
 	 * @return	array
 	 */
 	public function logout () {
-		if ($this->checkLogin() !== true) throw new Exception('you musst be logged in to use this method');
+		if ($this->checkLogin() !== true) throw new RouterExeption('you musst be logged in to use this method');
 		
 		$path = 'data/Login.json';
 		$fields = array('csrf_token' =>  $this->token, 'logout' => 'byby');
@@ -168,7 +171,7 @@ class SpeedportHybrid {
 			return $json;
 		}
 		else {
-			throw new Exception('logout failed');
+			throw new RouterExeption('logout failed');
 		}
 	}
 	
@@ -178,15 +181,23 @@ class SpeedportHybrid {
 	 * @return	array
 	 */
 	public function reboot () {
-		if ($this->checkLogin() !== true) throw new Exception('you musst be logged in to use this method');
+		if ($this->checkLogin() !== true) throw new RouterExeption('you musst be logged in to use this method');
 		
 		$path = 'data/Reboot.json';
-		$fields = array('csrf_token' => 'nulltoken', 'showpw' => 0, 'password' => $this->hash, 'reboot_device' => 'true');
-		$data = $this->sentRequest($path, $fields, true);
+		$fields = array('csrf_token' => $this->token, 'reboot_device' => 'true');
+		$data = $this->sentEncryptedRequest($path, $fields, true);
 		
 		$json = json_decode($data['body'], true);
+		$json = $this->getValues($json);
 		
-		return $json;
+		if ($json['status'] == 'ok') {
+			// throw an exception because router is unavailable for other tasks
+			// like $this->logout() or $this->checkLogin
+			throw new RebootException('Router Reboot');
+		}
+		else {
+			throw new RouterException('unable to reboot');
+		}
 	}
 	
 	/**
@@ -195,7 +206,7 @@ class SpeedportHybrid {
 	 * @param	string	$status
 	 */
 	public function changeConnectionStatus ($status) {
-		if ($this->checkLogin() !== true) throw new Exception('you musst be logged in to use this method');
+		if ($this->checkLogin() !== true) throw new RouterExeption('you musst be logged in to use this method');
 		
 		$path = 'data/Connect.json';
 		
@@ -203,12 +214,12 @@ class SpeedportHybrid {
 			$fields = array('csrf_token' => 'nulltoken', 'showpw' => 0, 'password' => $this->hash, 'req_connect' => $status);
 			$data = $this->sentRequest($path, $fields, true);
 			
-			$json = json_decode($this->decrypt($data['body']), true);
+			$json = json_decode($data['body'], true);
 			
 			return $json;
 		}
 		else {
-			throw new Exception();
+			throw new RouterExeption();
 		}
 	}
 	
@@ -219,14 +230,14 @@ class SpeedportHybrid {
 	 * @return	array
 	 */
 	public function getData ($file) {
-		if ($this->checkLogin() !== true && $file != "Status") throw new Exception('you musst be logged in to use this method');
+		if ($this->checkLogin() !== true && $file != "Status") throw new RouterExeption('you musst be logged in to use this method');
 		
 		$path = 'data/'.$file.'.json';
 		$fields = array();
 		$data = $this->sentRequest($path, $fields, true);
 		
 		if (empty($data['body'])) {
-			throw new Exception('unable to get '.$file.' data');
+			throw new RouterExeption('unable to get '.$file.' data');
 		}
 		
 		$json = json_decode($data['body'], true);
@@ -276,14 +287,14 @@ class SpeedportHybrid {
 	 * @return	array
 	 */
 	private function exportData ($type) {
-		if ($this->checkLogin() !== true) throw new Exception('you musst be logged in to use this method');
+		if ($this->checkLogin() !== true) throw new RouterExeption('you musst be logged in to use this method');
 		
 		$path = 'data/Syslog.json';
 		$fields = array('exporttype' => $type);
 		$data = $this->sentRequest($path, $fields, true);
 		
 		if (empty($data['body'])) {
-			throw new Exception('unable to get export data');
+			throw new RouterExeption('unable to get export data');
 		}
 		
 		return explode("\n", $data['body']);
@@ -295,12 +306,11 @@ class SpeedportHybrid {
 	 * @return	array
 	 */
 	public function reconnectLte () {
-		if ($this->checkLogin() !== true) throw new Exception('you musst be logged in to use this method');
+		if ($this->checkLogin() !== true) throw new RouterExeption('you musst be logged in to use this method');
 		
 		$path = 'data/modules.json';
 		$fields = array('csrf_token' => $this->token, 'lte_reconn' => '1');
-		$fields = $this->encrypt($fields);
-		$data = $this->sentRequest($path, $fields, true, 2);
+		$data = $this->sentEncryptedRequest($path, $fields, true);
 		$json = json_decode($data['body'], true);
 		
 		return $json;
@@ -313,7 +323,7 @@ class SpeedportHybrid {
 	 * @return	array
 	 */
 	public function resetToFactoryDefault () {
-		if ($this->checkLogin() !== true) throw new Exception('you musst be logged in to use this method');
+		if ($this->checkLogin() !== true) throw new RouterExeption('you musst be logged in to use this method');
 		
 		$path = 'data/resetAllSetting.json';
 		$fields = array('csrf_token' => 'nulltoken', 'showpw' => 0, 'password' => $this->hash, 'reset_all' => 'true');
@@ -330,14 +340,14 @@ class SpeedportHybrid {
 	 * @return	array
 	 */
 	public function checkFirmware () {
-		if ($this->checkLogin() !== true) throw new Exception('you musst be logged in to use this method');
+		if ($this->checkLogin() !== true) throw new RouterExeption('you musst be logged in to use this method');
 		
 		$path = 'data/checkfirmware.json';
 		$fields = array('checkfirmware' => 'true');
 		$data = $this->sentRequest($path, $fields, true);
 		
 		if (empty($data['body'])) {
-			throw new Exception('unable to get checkfirmware data');
+			throw new RouterExeption('unable to get checkfirmware data');
 		}
 		
 		$json = json_decode($data['body'], true);
@@ -407,6 +417,20 @@ class SpeedportHybrid {
 	}
 	
 	/**
+	 * sends the encrypted request to router
+	 * 
+	 * @param	string	$path
+	 * @param	mixed	$fields
+	 * @param	string	$cookie
+	 * @return	array
+	 */
+	private function sentEncryptedRequest ($path, $fields, $cookie = false) {
+		$count = count($fields);
+		$fields = $this->encrypt($fields);
+		return $this->sentRequest($path, $fields, $cookie, $count);
+	}
+	
+	/**
 	 * sends the request to router
 	 * 
 	 * @param	string	$path
@@ -449,6 +473,11 @@ class SpeedportHybrid {
 		$body = substr($result, $header_size);
 		curl_close($ch);
 		
+		// check if body is encrypted (hex instead of json)
+		if (ctype_xdigit($body)) {
+			$body = $this->decrypt($body);
+		}
+		
 		// fix invalid json
 		$body = preg_replace("/(\r\n)|(\r)/", "\n", $body);
 		$body = preg_replace('/\'/i', '"', $body);
@@ -464,14 +493,14 @@ class SpeedportHybrid {
 	 * @return	string
 	 */
 	private function getToken () {
-		if ($this->checkLogin() !== true) throw new Exception('you musst be logged in to use this method');
+		if ($this->checkLogin() !== true) throw new RouterExeption('you musst be logged in to use this method');
 		
 		$path = 'html/content/overview/index.html';
 		$fields = array();
 		$data = $this->sentRequest($path, $fields, true);
 		
 		if (empty($data['body'])) {
-			throw new Exception('unable to get csrf_token');
+			throw new RouterExeption('unable to get csrf_token');
 		}
 		
 		$a = explode('csrf_token = "', $data['body']);
@@ -481,7 +510,7 @@ class SpeedportHybrid {
 			return $a[0];
 		}
 		else {
-			throw new Exception('unable to get csrf_token');
+			throw new RouterExeption('unable to get csrf_token');
 		}
 	}
 	
