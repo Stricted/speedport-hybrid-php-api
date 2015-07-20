@@ -36,7 +36,7 @@ class SpeedportHybrid {
 	 * session cookie
 	 * @var	string
 	 */
-	private $session = '';
+	private $cookie = '';
 	
 	/**
 	 * router url
@@ -65,7 +65,10 @@ class SpeedportHybrid {
 		$data = $this->getValues($data);
 		
 		if (isset($data['challengev']) && !empty($data['challengev'])) {
-			$this->challenge = $data['challengev'];
+			return $data['challengev'];
+		}
+		else {
+			throw new RouterExeption('unable to get the challenge from the router');
 		}
 	}
 	
@@ -76,11 +79,7 @@ class SpeedportHybrid {
 	 * @return	boolean
 	 */
 	public function login ($password) {
-		$this->getChallenge();
-		
-		if (empty($this->challenge)) {
-			throw new RouterExeption('unable to get the challenge from the router');
-		}
+		$this->challenge = $this->getChallenge();
 		
 		$path = 'data/Login.json';
 		$this->hash = hash('sha256', $this->challenge.':'.$password);
@@ -88,33 +87,17 @@ class SpeedportHybrid {
 		$data = $this->sentRequest($path, $fields);
 		$json = json_decode($data['body'], true);
 		$json = $this->getValues($json);
+		
 		if (isset($json['login']) && $json['login'] == 'success') {
-			if (isset($data['header']['Set-Cookie']) && !empty($data['header']['Set-Cookie'])) {
-				preg_match('/^.*(SessionID_R3=[a-z0-9]*).*/i', $data['header']['Set-Cookie'], $match);
-				if (isset($match[1]) && !empty($match[1])) {
-					$this->session = $match[1];
-				}
-				else {
-					throw new RouterExeption('unable to get the session cookie from the router');
-				}
-				
-				// calculate derivedk
-				if (!function_exists("hash_pbkdf2")) {
-					require_once 'CryptLib/CryptLib.php';
-					$pbkdf2 = new CryptLib\Key\Derivation\PBKDF\PBKDF2(array('hash' => 'sha1'));
-					$this->derivedk = bin2hex($pbkdf2->derive(hash('sha256', $password), substr($this->challenge, 0, 16), 1000, 32));
-					$this->derivedk = substr($this->derivedk, 0, 32);
-				}
-				else {
-					$this->derivedk = hash_pbkdf2('sha1', hash('sha256', $password), substr($this->challenge, 0, 16), 1000, 32);
-				}
-				
-				// get the csrf_token
-				$this->token = $this->getToken();
-				
-				if ($this->checkLogin(false) === true) {
-					return true;
-				}
+			$this->cookie = $this->getCookie($data);
+			
+			$this->derivedk = $this->getDerviedk($password);
+			
+			// get the csrf_token
+			$this->token = $this->getToken();
+			
+			if ($this->checkLogin(false) === true) {
+				return true;
 			}
 		}
 		
@@ -128,7 +111,8 @@ class SpeedportHybrid {
 	 * @return	boolean
 	 */
 	public function checkLogin ($exception = true) {
-		if (empty($this->challenge) && empty($this->session)) {
+		// check if challenge or session is empty
+		if (empty($this->challenge) || empty($this->cookie)) {
 			if ($exception === true) {
 				throw new RouterExeption('you musst be logged in to use this method');
 			}
@@ -172,8 +156,9 @@ class SpeedportHybrid {
 		if ($this->checkLogin(false) === false) {
 			// reset challenge and session
 			$this->challenge = '';
-			$this->session = '';
-			$this->token = "";
+			$this->cookie = '';
+			$this->token = '';
+			$this->derivedk = '';
 			
 			$json = json_decode($data['body'], true);
 			
@@ -239,7 +224,7 @@ class SpeedportHybrid {
 	 * @return	array
 	 */
 	public function getData ($file) {
-		if ($file != "Status") $this->checkLogin();
+		if ($file != 'Status') $this->checkLogin();
 		
 		$path = 'data/'.$file.'.json';
 		$fields = array();
@@ -465,7 +450,7 @@ class SpeedportHybrid {
 		}
 		
 		if ($cookie === true) {
-			curl_setopt($ch, CURLOPT_COOKIE, 'challengev='.$this->challenge.'; '.$this->session);
+			curl_setopt($ch, CURLOPT_COOKIE, 'challengev='.$this->challenge.'; '.$this->cookie);
 		}
 		
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -521,6 +506,46 @@ class SpeedportHybrid {
 		else {
 			throw new RouterExeption('unable to get csrf_token');
 		}
+	}
+	
+	/**
+	 * calculate the derivedk
+	 *
+	 * @param	string	$password
+	 * @return	string
+	 */
+	private function getDerviedk ($password) {
+		$derivedk = '';
+		
+		// calculate derivedk
+		if (!function_exists('hash_pbkdf2')) {
+			require_once 'CryptLib/CryptLib.php';
+			$pbkdf2 = new CryptLib\Key\Derivation\PBKDF\PBKDF2(array('hash' => 'sha1'));
+			$derivedk = bin2hex($pbkdf2->derive(hash('sha256', $password), substr($this->challenge, 0, 16), 1000, 32));
+			$derivedk = substr($this->derivedk, 0, 32);
+		}
+		else {
+			$derivedk = hash_pbkdf2('sha1', hash('sha256', $password), substr($this->challenge, 0, 16), 1000, 32);
+		}
+		
+		return $derivedk;
+	}
+	
+	/**
+	 * get cookie from header data
+	 *
+	 * @param	array	$data
+	 * @return	string
+	 */
+	private function getCookie ($data) {
+		if (isset($data['header']['Set-Cookie']) && !empty($data['header']['Set-Cookie'])) {
+			preg_match('/^.*(SessionID_R3=[a-z0-9]*).*/i', $data['header']['Set-Cookie'], $match);
+			if (isset($match[1]) && !empty($match[1])) {
+				return $match[1];
+			}
+		}
+		
+		throw new RouterExeption('unable to get the session cookie from the router');
 	}
 	
 	/**
