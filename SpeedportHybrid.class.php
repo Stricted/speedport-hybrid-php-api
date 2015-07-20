@@ -391,11 +391,17 @@ class SpeedportHybrid {
 	private function getValues($array) {
 		$data = array();
 		foreach ($array as $item) {
-			if (is_array($item['varvalue'])) {
+			// thank you telekom for this piece of bullshit
+			if ($item['vartype'] == 'template') {
 				$data[$item['varid']] = $this->getValues($item['varvalue']);
 			}
 			else {
-				$data[$item['varid']] = $item['varvalue'];
+				if (is_array($item['varvalue'])) {
+					$data[$item['varid']] = $this->getValues($item['varvalue']);
+				}
+				else {
+					$data[$item['varid']] = $item['varvalue'];
+				}
 			}
 		}
 		
@@ -442,7 +448,7 @@ class SpeedportHybrid {
 		}
 		
 		if ($cookie === true) {
-			curl_setopt($ch, CURLOPT_COOKIE, 'challengev='.$this->challenge.'; '.$this->cookie);
+			curl_setopt($ch, CURLOPT_COOKIE, 'lang=en; challengev='.$this->challenge.'; '.$this->cookie);
 		}
 		
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -476,7 +482,7 @@ class SpeedportHybrid {
 		$body = preg_replace("/},\s+]/", "}\n]", $body);
 		
 		// decode json
-		if (strpos($url, '.json') !== false) {
+		if (strpos($url, '.json') !== false && strpos($url, 'Syslog.json') === false) {
 			$body = json_decode($body, true);
 		}
 		
