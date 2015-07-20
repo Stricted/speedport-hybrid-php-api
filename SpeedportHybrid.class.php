@@ -393,7 +393,12 @@ class SpeedportHybrid {
 		foreach ($array as $item) {
 			// thank you telekom for this piece of bullshit
 			if ($item['vartype'] == 'template') {
-				$data[$item['varid']] = $this->getValues($item['varvalue']);
+				if (is_array($item['varvalue'])) {
+					$data[$item['varid']][] = $this->getValues($item['varvalue']);
+				}
+				else {
+					$data[$item['varid']] = $item['varvalue'];
+				}
 			}
 			else {
 				if (is_array($item['varvalue'])) {
