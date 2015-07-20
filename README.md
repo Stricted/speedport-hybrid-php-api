@@ -32,6 +32,7 @@ known valid paths for getData() :
  * data/filterlist.json
  * data/bonding_tr181.json
  * data/letinfo.json
+ * data/Connect.json
  * data/Status.json
  
 PHP requirements

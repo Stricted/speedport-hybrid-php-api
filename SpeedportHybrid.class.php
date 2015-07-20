@@ -145,14 +145,14 @@ class SpeedportHybrid {
 	/**
 	 * logout
 	 * 
-	 * @return	array
+	 * @return	boolean
 	 */
 	public function logout () {
 		$this->checkLogin();
 		
 		$path = 'data/Login.json';
 		$fields = array('csrf_token' =>  $this->token, 'logout' => 'byby');
-		$data = $this->sentRequest($path, $fields, true);
+		$this->sentRequest($path, $fields, true);
 		if ($this->checkLogin(false) === false) {
 			// reset challenge and session
 			$this->challenge = '';
@@ -160,19 +160,16 @@ class SpeedportHybrid {
 			$this->token = '';
 			$this->derivedk = '';
 			
-			$json = json_decode($data['body'], true);
-			
-			return $json;
+			return true;
 		}
-		else {
-			throw new RouterExeption('logout failed');
-		}
+		
+		return false;
 	}
 	
 	/**
 	 * reboot the router
 	 * 
-	 * @return	array
+	 * @return	boolean
 	 */
 	public function reboot () {
 		$this->checkLogin();
@@ -189,15 +186,15 @@ class SpeedportHybrid {
 			// like $this->logout() or $this->checkLogin
 			throw new RebootException('Router Reboot');
 		}
-		else {
-			throw new RouterException('unable to reboot');
-		}
+		
+		return false;
 	}
 	
 	/**
 	 * change dsl connection status
 	 * 
 	 * @param	string	$status
+	 * @return	boolean
 	 */
 	public function changeConnectionStatus ($status) {
 		$this->checkLogin();
@@ -209,12 +206,31 @@ class SpeedportHybrid {
 			$data = $this->sentRequest($path, $fields, true);
 			
 			$json = json_decode($data['body'], true);
+			$json = $this->getValues($json);
 			
-			return $json;
+			if ($json['status'] == 'ok') {
+				return true;
+			}
+			else {
+				return false;
+			}
 		}
 		else {
 			throw new RouterExeption();
 		}
+	}
+	
+	/**
+	 * get uptime based on online (connection) time
+	 *
+	 * @return	string
+	 */
+	public function getUptime () {
+		// TODO: search for a better solution, calling Connect.json need some time
+		$data = $this->getData('Connect');
+		$data = $this->getValues($data);
+		
+		return $data['days_online'];
 	}
 	
 	/**
@@ -404,7 +420,12 @@ class SpeedportHybrid {
 	private function getValues($array) {
 		$data = array();
 		foreach ($array as $item) {
-			$data[$item['varid']] = $item['varvalue'];
+			if (is_array($item['varvalue'])) {
+				$data[$item['varid']] = $this->getValues($item['varvalue']);
+			}
+			else {
+				$data[$item['varid']] = $item['varvalue'];
+			}
 		}
 		
 		return $data;
@@ -522,10 +543,14 @@ class SpeedportHybrid {
 			require_once 'CryptLib/CryptLib.php';
 			$pbkdf2 = new CryptLib\Key\Derivation\PBKDF\PBKDF2(array('hash' => 'sha1'));
 			$derivedk = bin2hex($pbkdf2->derive(hash('sha256', $password), substr($this->challenge, 0, 16), 1000, 32));
-			$derivedk = substr($this->derivedk, 0, 32);
+			$derivedk = substr($derivedk, 0, 32);
 		}
 		else {
 			$derivedk = hash_pbkdf2('sha1', hash('sha256', $password), substr($this->challenge, 0, 16), 1000, 32);
+		}
+		
+		if (empty($derivedk)) {
+			throw new RouterException('unable to calculate derivedk');
 		}
 		
 		return $derivedk;
@@ -538,14 +563,19 @@ class SpeedportHybrid {
 	 * @return	string
 	 */
 	private function getCookie ($data) {
+		$cookie = '';
 		if (isset($data['header']['Set-Cookie']) && !empty($data['header']['Set-Cookie'])) {
 			preg_match('/^.*(SessionID_R3=[a-z0-9]*).*/i', $data['header']['Set-Cookie'], $match);
 			if (isset($match[1]) && !empty($match[1])) {
-				return $match[1];
+				$cookie = $match[1];
 			}
 		}
 		
-		throw new RouterExeption('unable to get the session cookie from the router');
+		if (empty($cookie)) {
+			throw new RouterExeption('unable to get the session cookie from the router');
+		}
+		
+		return $cookie;
 	}
 	
 	/**
