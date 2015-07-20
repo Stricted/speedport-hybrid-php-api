@@ -262,27 +262,6 @@ class SpeedportHybrid {
 	}
 	
 	/**
-	 * get the router syslog
-	 * 
-	 * @return	array
-	 */
-	public function test() {
-		$data = $this->getData('NASLight');
-		$data = $this->getValues($data);
-		print_r($data);
-		/*
-		$data = $this->getValues($data);
-		
-		if (isset($data['addmessage'])) {
-			return $data['addmessage'];
-		}
-		else {
-			return array();
-		}
-		*/
-	}
-	
-	/**
 	 * get the Missed Calls from router
 	 * 
 	 * @return	array
