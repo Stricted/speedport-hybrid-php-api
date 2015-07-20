@@ -12,7 +12,7 @@ class SpeedportHybrid {
 	 *
 	 *
 	 */
-	const VERSION = '1.0.2';
+	const VERSION = '1.0.3';
 	
 	/**
 	 * password-challenge
@@ -61,14 +61,13 @@ class SpeedportHybrid {
 		$path = 'data/Login.json';
 		$fields = array('csrf_token' => 'nulltoken', 'showpw' => 0, 'challengev' => 'null');
 		$data = $this->sentRequest($path, $fields);
-		$data = json_decode($data['body'], true);
-		$data = $this->getValues($data);
+		$data = $this->getValues($data['body']);
 		
 		if (isset($data['challengev']) && !empty($data['challengev'])) {
 			return $data['challengev'];
 		}
 		else {
-			throw new RouterExeption('unable to get the challenge from the router');
+			throw new RouterException('unable to get the challenge from the router');
 		}
 	}
 	
@@ -85,8 +84,7 @@ class SpeedportHybrid {
 		$this->hash = hash('sha256', $this->challenge.':'.$password);
 		$fields = array('csrf_token' => 'nulltoken', 'showpw' => 0, 'password' => $this->hash);
 		$data = $this->sentRequest($path, $fields);
-		$json = json_decode($data['body'], true);
-		$json = $this->getValues($json);
+		$json = $this->getValues($data['body']);
 		
 		if (isset($json['login']) && $json['login'] == 'success') {
 			$this->cookie = $this->getCookie($data);
@@ -114,7 +112,7 @@ class SpeedportHybrid {
 		// check if challenge or session is empty
 		if (empty($this->challenge) || empty($this->cookie)) {
 			if ($exception === true) {
-				throw new RouterExeption('you musst be logged in to use this method');
+				throw new RouterException('you musst be logged in to use this method');
 			}
 			
 			return false;
@@ -123,17 +121,11 @@ class SpeedportHybrid {
 		$path = 'data/SecureStatus.json';
 		$fields = array();
 		$data = $this->sentRequest($path, $fields, true);
+		$data = $this->getValues($data['body']);
 		
-		if (empty($data['body'])) {
-			throw new RouterExeption('unable to get SecureStatus data');
-		}
-		
-		$json = json_decode($data['body'], true);
-		$json = $this->getValues($json);
-		
-		if ($json['loginstate'] != 1) {
+		if ($data['loginstate'] != 1) {
 			if ($exception === true) {
-				throw new RouterExeption('you musst be logged in to use this method');
+				throw new RouterException('you musst be logged in to use this method');
 			}
 			
 			return false;
@@ -152,8 +144,9 @@ class SpeedportHybrid {
 		
 		$path = 'data/Login.json';
 		$fields = array('csrf_token' =>  $this->token, 'logout' => 'byby');
-		$this->sentRequest($path, $fields, true);
-		if ($this->checkLogin(false) === false) {
+		$data = $this->sentRequest($path, $fields, true);
+		$data = $this->getValues($data['body']);
+		if ((isset($data['status']) && $data['status'] == 'ok') && $this->checkLogin(false) === false) {
 			// reset challenge and session
 			$this->challenge = '';
 			$this->cookie = '';
@@ -177,11 +170,9 @@ class SpeedportHybrid {
 		$path = 'data/Reboot.json';
 		$fields = array('csrf_token' => $this->token, 'reboot_device' => 'true');
 		$data = $this->sentEncryptedRequest($path, $fields, true);
+		$data = $this->getValues($data['body']);
 		
-		$json = json_decode($data['body'], true);
-		$json = $this->getValues($json);
-		
-		if ($json['status'] == 'ok') {
+		if ($data['status'] == 'ok') {
 			// throw an exception because router is unavailable for other tasks
 			// like $this->logout() or $this->checkLogin
 			throw new RebootException('Router Reboot');
@@ -204,11 +195,9 @@ class SpeedportHybrid {
 		if ($status == 'online' || $status == 'offline') {
 			$fields = array('csrf_token' => 'nulltoken', 'showpw' => 0, 'password' => $this->hash, 'req_connect' => $status);
 			$data = $this->sentRequest($path, $fields, true);
+			$data = $this->getValues($data['body']);
 			
-			$json = json_decode($data['body'], true);
-			$json = $this->getValues($json);
-			
-			if ($json['status'] == 'ok') {
+			if ($data['status'] == 'ok') {
 				return true;
 			}
 			else {
@@ -216,7 +205,7 @@ class SpeedportHybrid {
 			}
 		}
 		else {
-			throw new RouterExeption();
+			throw new RouterException();
 		}
 	}
 	
@@ -246,13 +235,7 @@ class SpeedportHybrid {
 		$fields = array();
 		$data = $this->sentRequest($path, $fields, true);
 		
-		if (empty($data['body'])) {
-			throw new RouterExeption('unable to get '.$file.' data');
-		}
-		
-		$json = json_decode($data['body'], true);
-		
-		return $json;
+		return $data['body'];
 	}
 	
 	/**
@@ -303,10 +286,6 @@ class SpeedportHybrid {
 		$fields = array('exporttype' => $type);
 		$data = $this->sentRequest($path, $fields, true);
 		
-		if (empty($data['body'])) {
-			throw new RouterExeption('unable to get export data');
-		}
-		
 		return explode("\n", $data['body']);
 	}
 	
@@ -321,9 +300,8 @@ class SpeedportHybrid {
 		$path = 'data/modules.json';
 		$fields = array('csrf_token' => $this->token, 'lte_reconn' => '1');
 		$data = $this->sentEncryptedRequest($path, $fields, true);
-		$json = json_decode($data['body'], true);
 		
-		return $json;
+		return $data['body'];
 	}
 	
 	/**
@@ -338,9 +316,8 @@ class SpeedportHybrid {
 		$path = 'data/resetAllSetting.json';
 		$fields = array('csrf_token' => 'nulltoken', 'showpw' => 0, 'password' => $this->hash, 'reset_all' => 'true');
 		$data = $this->sentRequest($path, $fields, true);
-		$json = json_decode($data['body'], true);
 		
-		return $json;
+		return $data['body'];
 	}
 	
 	
@@ -356,13 +333,7 @@ class SpeedportHybrid {
 		$fields = array('checkfirmware' => 'true');
 		$data = $this->sentRequest($path, $fields, true);
 		
-		if (empty($data['body'])) {
-			throw new RouterExeption('unable to get checkfirmware data');
-		}
-		
-		$json = json_decode($data['body'], true);
-		
-		return $json;
+		return $data['body'];
 	}
 	
 	/**
@@ -488,6 +459,11 @@ class SpeedportHybrid {
 		$body = substr($result, $header_size);
 		curl_close($ch);
 		
+		// check if response is empty
+		if (empty($body)) {
+			throw new RouterException('empty response');
+		}
+		
 		// check if body is encrypted (hex instead of json)
 		if (ctype_xdigit($body)) {
 			$body = $this->decrypt($body);
@@ -498,6 +474,11 @@ class SpeedportHybrid {
 		$body = preg_replace('/\'/i', '"', $body);
 		$body = preg_replace("/\[\s+\]/i", '[ {} ]', $body);
 		$body = preg_replace("/},\s+]/", "}\n]", $body);
+		
+		// decode json
+		if (strpos($url, '.json') !== false) {
+			$body = json_decode($body, true);
+		}
 		
 		return array('header' => $this->parse_headers($header), 'body' => $body);
 	}
@@ -514,10 +495,6 @@ class SpeedportHybrid {
 		$fields = array();
 		$data = $this->sentRequest($path, $fields, true);
 		
-		if (empty($data['body'])) {
-			throw new RouterExeption('unable to get csrf_token');
-		}
-		
 		$a = explode('csrf_token = "', $data['body']);
 		$a = explode('";', $a[1]);
 		
@@ -525,7 +502,7 @@ class SpeedportHybrid {
 			return $a[0];
 		}
 		else {
-			throw new RouterExeption('unable to get csrf_token');
+			throw new RouterException('unable to get csrf_token');
 		}
 	}
 	
@@ -572,7 +549,7 @@ class SpeedportHybrid {
 		}
 		
 		if (empty($cookie)) {
-			throw new RouterExeption('unable to get the session cookie from the router');
+			throw new RouterException('unable to get the session cookie from the router');
 		}
 		
 		return $cookie;
