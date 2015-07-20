@@ -112,7 +112,7 @@ class SpeedportHybrid {
 				// get the csrf_token
 				$this->token = $this->getToken();
 				
-				if ($this->checkLogin() === true) {
+				if ($this->checkLogin(false) === true) {
 					return true;
 				}
 			}
@@ -124,10 +124,15 @@ class SpeedportHybrid {
 	/**
 	 * check if we are logged in
 	 *
-	 * @return boolean
+	 * @param	boolean	$exception
+	 * @return	boolean
 	 */
-	public function checkLogin () {
+	public function checkLogin ($exception = true) {
 		if (empty($this->challenge) && empty($this->session)) {
+			if ($exception === true) {
+				throw new RouterExeption('you musst be logged in to use this method');
+			}
+			
 			return false;
 		}
 		
@@ -143,6 +148,10 @@ class SpeedportHybrid {
 		$json = $this->getValues($json);
 		
 		if ($json['loginstate'] != 1) {
+			if ($exception === true) {
+				throw new RouterExeption('you musst be logged in to use this method');
+			}
+			
 			return false;
 		}
 		
@@ -155,12 +164,12 @@ class SpeedportHybrid {
 	 * @return	array
 	 */
 	public function logout () {
-		if ($this->checkLogin() !== true) throw new RouterExeption('you musst be logged in to use this method');
+		$this->checkLogin();
 		
 		$path = 'data/Login.json';
 		$fields = array('csrf_token' =>  $this->token, 'logout' => 'byby');
 		$data = $this->sentRequest($path, $fields, true);
-		if ($this->checkLogin() === false) {
+		if ($this->checkLogin(false) === false) {
 			// reset challenge and session
 			$this->challenge = '';
 			$this->session = '';
@@ -181,7 +190,7 @@ class SpeedportHybrid {
 	 * @return	array
 	 */
 	public function reboot () {
-		if ($this->checkLogin() !== true) throw new RouterExeption('you musst be logged in to use this method');
+		$this->checkLogin();
 		
 		$path = 'data/Reboot.json';
 		$fields = array('csrf_token' => $this->token, 'reboot_device' => 'true');
@@ -206,7 +215,7 @@ class SpeedportHybrid {
 	 * @param	string	$status
 	 */
 	public function changeConnectionStatus ($status) {
-		if ($this->checkLogin() !== true) throw new RouterExeption('you musst be logged in to use this method');
+		$this->checkLogin();
 		
 		$path = 'data/Connect.json';
 		
@@ -230,7 +239,7 @@ class SpeedportHybrid {
 	 * @return	array
 	 */
 	public function getData ($file) {
-		if ($this->checkLogin() !== true && $file != "Status") throw new RouterExeption('you musst be logged in to use this method');
+		if ($file != "Status") $this->checkLogin();
 		
 		$path = 'data/'.$file.'.json';
 		$fields = array();
@@ -287,7 +296,7 @@ class SpeedportHybrid {
 	 * @return	array
 	 */
 	private function exportData ($type) {
-		if ($this->checkLogin() !== true) throw new RouterExeption('you musst be logged in to use this method');
+		$this->checkLogin();
 		
 		$path = 'data/Syslog.json';
 		$fields = array('exporttype' => $type);
@@ -306,7 +315,7 @@ class SpeedportHybrid {
 	 * @return	array
 	 */
 	public function reconnectLte () {
-		if ($this->checkLogin() !== true) throw new RouterExeption('you musst be logged in to use this method');
+		$this->checkLogin();
 		
 		$path = 'data/modules.json';
 		$fields = array('csrf_token' => $this->token, 'lte_reconn' => '1');
@@ -323,7 +332,7 @@ class SpeedportHybrid {
 	 * @return	array
 	 */
 	public function resetToFactoryDefault () {
-		if ($this->checkLogin() !== true) throw new RouterExeption('you musst be logged in to use this method');
+		$this->checkLogin();
 		
 		$path = 'data/resetAllSetting.json';
 		$fields = array('csrf_token' => 'nulltoken', 'showpw' => 0, 'password' => $this->hash, 'reset_all' => 'true');
@@ -340,7 +349,7 @@ class SpeedportHybrid {
 	 * @return	array
 	 */
 	public function checkFirmware () {
-		if ($this->checkLogin() !== true) throw new RouterExeption('you musst be logged in to use this method');
+		$this->checkLogin();
 		
 		$path = 'data/checkfirmware.json';
 		$fields = array('checkfirmware' => 'true');
@@ -493,7 +502,7 @@ class SpeedportHybrid {
 	 * @return	string
 	 */
 	private function getToken () {
-		if ($this->checkLogin() !== true) throw new RouterExeption('you musst be logged in to use this method');
+		$this->checkLogin();
 		
 		$path = 'html/content/overview/index.html';
 		$fields = array();
