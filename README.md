@@ -33,6 +33,15 @@ known valid paths for getData() :
  * data/bonding_tr181.json
  * data/letinfo.json
  * data/Connect.json
+ * data/WLANBasic.json
+ * data/WLANAccess.json
+ * data/LAN.json
+ * data/NASLight.json
+ * data/INetIP.json
+ * data/FilterAndTime.json
+ * data/Portforwarding.json
+ * data/DynDNS.json
+ * data/Overview.json
  * data/Status.json
  
 PHP requirements

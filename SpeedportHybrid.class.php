@@ -1,6 +1,7 @@
 <?php
 require_once('RebootException.class.php');
 require_once('RouterException.class.php');
+require_once('CryptLib/CryptLib.php');
 
 /**
  * @author      Jan Altensen (Stricted)
@@ -173,6 +174,12 @@ class SpeedportHybrid {
 		$data = $this->getValues($data['body']);
 		
 		if ($data['status'] == 'ok') {
+			// reset challenge and session
+			$this->challenge = '';
+			$this->cookie = '';
+			$this->token = '';
+			$this->derivedk = ''; 
+			
 			// throw an exception because router is unavailable for other tasks
 			// like $this->logout() or $this->checkLogin
 			throw new RebootException('Router Reboot');
@@ -215,8 +222,7 @@ class SpeedportHybrid {
 	 * @return	string
 	 */
 	public function getUptime () {
-		// TODO: search for a better solution, calling Connect.json need some time
-		$data = $this->getData('Connect');
+		$data = $this->getData('LAN');
 		$data = $this->getValues($data);
 		
 		return $data['days_online'];
@@ -244,7 +250,36 @@ class SpeedportHybrid {
 	 * @return	array
 	 */
 	public function getSyslog() {
-		return $this->exportData('0');
+		$data = $this->getData('SystemMessages');
+		$data = $this->getValues($data);
+		
+		if (isset($data['addmessage'])) {
+			return $data['addmessage'];
+		}
+		else {
+			return array();
+		}
+	}
+	
+	/**
+	 * get the router syslog
+	 * 
+	 * @return	array
+	 */
+	public function test() {
+		$data = $this->getData('NASLight');
+		$data = $this->getValues($data);
+		print_r($data);
+		/*
+		$data = $this->getValues($data);
+		
+		if (isset($data['addmessage'])) {
+			return $data['addmessage'];
+		}
+		else {
+			return array();
+		}
+		*/
 	}
 	
 	/**
@@ -253,7 +288,15 @@ class SpeedportHybrid {
 	 * @return	array
 	 */
 	public function getMissedCalls() {
-		return $this->exportData('1');
+		$data = $this->getData('PhoneCalls');
+		$data = $this->getValues($data);
+		
+		if (isset($data['addmissedcalls'])) {
+			return $data['addmissedcalls'];
+		}
+		else {
+			return array();
+		}
 	}
 	
 	/**
@@ -262,7 +305,15 @@ class SpeedportHybrid {
 	 * @return	array
 	 */
 	public function getTakenCalls() {
-		return $this->exportData('2');
+		$data = $this->getData('PhoneCalls');
+		$data = $this->getValues($data);
+		
+		if (isset($data['addtakencalls'])) {
+			return $data['addtakencalls'];
+		}
+		else {
+			return array();
+		}
 	}
 	
 	/**
@@ -271,22 +322,15 @@ class SpeedportHybrid {
 	 * @return	array
 	 */
 	public function getDialedCalls() {
-		return $this->exportData('3');
-	}
-	
-	/**
-	 * export data from router
-	 * 
-	 * @return	array
-	 */
-	private function exportData ($type) {
-		$this->checkLogin();
+		$data = $this->getData('PhoneCalls');
+		$data = $this->getValues($data);
 		
-		$path = 'data/Syslog.json';
-		$fields = array('exporttype' => $type);
-		$data = $this->sentRequest($path, $fields, true);
-		
-		return explode("\n", $data['body']);
+		if (isset($data['adddialedcalls'])) {
+			return $data['adddialedcalls'];
+		}
+		else {
+			return array();
+		}
 	}
 	
 	/**
@@ -343,7 +387,6 @@ class SpeedportHybrid {
 	 * @return	array
 	 */
 	private function decrypt ($data) {
-		require_once 'CryptLib/CryptLib.php';
 		$factory = new CryptLib\Cipher\Factory();
 		$aes = $factory->getBlockCipher('rijndael-128');
 		
@@ -367,7 +410,6 @@ class SpeedportHybrid {
 	 * @return	string
 	 */
 	private function encrypt ($data) {
-		require_once 'CryptLib/CryptLib.php';
 		$factory = new CryptLib\Cipher\Factory();
 		$aes = $factory->getBlockCipher('rijndael-128');
 		
@@ -391,7 +433,7 @@ class SpeedportHybrid {
 	private function getValues($array) {
 		$data = array();
 		foreach ($array as $item) {
-			// thank you telekom for this piece of bullshit
+			// thank you telekom for this piece of shit
 			if ($item['vartype'] == 'template') {
 				if (is_array($item['varvalue'])) {
 					$data[$item['varid']][] = $this->getValues($item['varvalue']);
@@ -459,10 +501,6 @@ class SpeedportHybrid {
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($ch, CURLOPT_HEADER, true);
 		
-		if ($cookie) {
-			
-		}
-		
 		$result = curl_exec($ch);
 		
 		$header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
@@ -487,7 +525,7 @@ class SpeedportHybrid {
 		$body = preg_replace("/},\s+]/", "}\n]", $body);
 		
 		// decode json
-		if (strpos($url, '.json') !== false && strpos($url, 'Syslog.json') === false) {
+		if (strpos($url, '.json') !== false) {
 			$body = json_decode($body, true);
 		}
 		
@@ -528,7 +566,6 @@ class SpeedportHybrid {
 		
 		// calculate derivedk
 		if (!function_exists('hash_pbkdf2')) {
-			require_once 'CryptLib/CryptLib.php';
 			$pbkdf2 = new CryptLib\Key\Derivation\PBKDF\PBKDF2(array('hash' => 'sha1'));
 			$derivedk = bin2hex($pbkdf2->derive(hash('sha256', $password), substr($this->challenge, 0, 16), 1000, 32));
 			$derivedk = substr($derivedk, 0, 32);
