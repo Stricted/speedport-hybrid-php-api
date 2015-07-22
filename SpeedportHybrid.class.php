@@ -10,8 +10,8 @@ require_once('CryptLib/CryptLib.php');
  */
 class SpeedportHybrid {
 	/**
-	 *
-	 *
+	 * class version
+	 * @const	string
 	 */
 	const VERSION = '1.0.3';
 	
@@ -212,7 +212,7 @@ class SpeedportHybrid {
 			}
 		}
 		else {
-			throw new RouterException();
+			throw new RouterException('unknown status');
 		}
 	}
 	
@@ -366,15 +366,14 @@ class SpeedportHybrid {
 	 * @return	array
 	 */
 	private function decrypt ($data) {
-		$factory = new CryptLib\Cipher\Factory();
-		$aes = $factory->getBlockCipher('rijndael-128');
-		
 		$iv = hex2bin(substr($this->challenge, 16, 16));
 		$adata = hex2bin(substr($this->challenge, 32, 16));
-		$dkey = hex2bin($this->derivedk);
+		$key = hex2bin($this->derivedk);
 		$enc = hex2bin($data);
 		
-		$aes->setKey($dkey);
+		$factory = new CryptLib\Cipher\Factory();
+		$aes = $factory->getBlockCipher('rijndael-128');
+		$aes->setKey($key);
 		$mode = $factory->getMode('ccm', $aes, $iv, [ 'adata' => $adata, 'lSize' => 7]);
 		
 		$mode->decrypt($enc);
@@ -385,20 +384,19 @@ class SpeedportHybrid {
 	/**
 	 * decrypt data for the router
 	 * 
-	 * @param	array	$data
+	 * @param	string	$data
 	 * @return	string
 	 */
 	private function encrypt ($data) {
-		$factory = new CryptLib\Cipher\Factory();
-		$aes = $factory->getBlockCipher('rijndael-128');
-		
 		$iv = hex2bin(substr($this->challenge, 16, 16));
 		$adata = hex2bin(substr($this->challenge, 32, 16));
-		$dkey = hex2bin($this->derivedk);
+		$key = hex2bin($this->derivedk);
 		
-		$aes->setKey($dkey);
+		$factory = new CryptLib\Cipher\Factory();
+		$aes = $factory->getBlockCipher('rijndael-128');
+		$aes->setKey($key);
 		$mode = $factory->getMode('ccm', $aes, $iv, [ 'adata' => $adata, 'lSize' => 7]);
-		$mode->encrypt(http_build_query($data));
+		$mode->encrypt($data);
 		
 		return bin2hex($mode->finish());
 	}
@@ -418,6 +416,7 @@ class SpeedportHybrid {
 					$data[$item['varid']][] = $this->getValues($item['varvalue']);
 				}
 				else {
+					// i dont know if we need this
 					$data[$item['varid']] = $item['varvalue'];
 				}
 			}
@@ -444,7 +443,7 @@ class SpeedportHybrid {
 	 */
 	private function sentEncryptedRequest ($path, $fields, $cookie = false) {
 		$count = count($fields);
-		$fields = $this->encrypt($fields);
+		$fields = $this->encrypt(http_build_query($fields));
 		return $this->sentRequest($path, $fields, $cookie, $count);
 	}
 	
