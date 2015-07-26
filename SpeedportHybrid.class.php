@@ -242,6 +242,23 @@ class SpeedportHybrid {
 	}
 	
 	/**
+	 * get phone book entrys
+	 *
+	 * @return	array
+	 */
+	public function getPhoneBookEntrys () {
+		$data = $this->getData('PhoneBook');
+		$data = $this->getValues($data);
+		
+		if (isset($data['addbookentry'])) {
+			return $data['addbookentry'];
+		}
+		else {
+			return array();
+		}
+	}
+	
+	/**
 	 * get uptime based on online (connection) time
 	 *
 	 * @return	string
