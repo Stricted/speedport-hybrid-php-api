@@ -5,6 +5,7 @@ require_once('CryptLib/CryptLib.php');
 require_once('lib/trait/Connection.class.php');
 require_once('lib/trait/CryptLib.class.php');
 require_once('lib/trait/Login.class.php');
+require_once('lib/trait/Network.class.php');
 require_once('lib/trait/Phone.class.php');
 require_once('lib/trait/System.class.php');
 
@@ -17,6 +18,7 @@ class SpeedportHybrid {
 	use Connection;
 	use CryptLib;
 	use Login;
+	use Network;
 	use Phone;
 	use System;
 	

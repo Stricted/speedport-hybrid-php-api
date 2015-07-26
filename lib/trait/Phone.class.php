@@ -38,8 +38,7 @@ trait Phone {
 		$this->checkLogin();
 		
 		$path = 'data/PhoneBook.json';
-		$fields = array(
-						'csrf_token' => $this->token,
+		$fields = array('csrf_token' => $this->token,
 						'id' => $id,
 						'search' => '',
 						'phonebook_name' => $name,
@@ -87,8 +86,7 @@ trait Phone {
 		$this->checkLogin();
 		
 		$path = 'data/PhoneBook.json';
-		$fields = array(
-						'csrf_token' => $this->token,
+		$fields = array('csrf_token' => $this->token,
 						'id' => $id,
 						'deleteEntry' => 'delete'
 						);
