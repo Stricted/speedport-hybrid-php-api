@@ -81,4 +81,32 @@ trait System {
 		
 		return $data['body'];
 	}
+	
+	/**
+	 * reboot the router
+	 * 
+	 * @return	boolean
+	 */
+	public function reboot () {
+		$this->checkLogin();
+		
+		$path = 'data/Reboot.json';
+		$fields = array('csrf_token' => $this->token, 'reboot_device' => 'true');
+		$data = $this->sentEncryptedRequest($path, $fields, true);
+		$data = $this->getValues($data['body']);
+		
+		if ($data['status'] == 'ok') {
+			// reset challenge and session
+			$this->challenge = '';
+			$this->cookie = '';
+			$this->token = '';
+			$this->derivedk = ''; 
+			
+			// throw an exception because router is unavailable for other tasks
+			// like $this->logout() or $this->checkLogin
+			throw new RebootException('Router Reboot');
+		}
+		
+		return false;
+	}
 }
