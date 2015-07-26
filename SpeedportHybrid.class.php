@@ -331,7 +331,6 @@ class SpeedportHybrid {
 		
 		$data = $this->sentRequest($path, $fields, true);
 		$data = $this->getValues($data['body']);
-		print_r($data);
 		
 		if ($data['status'] == 'ok') {
 			return $data;
