@@ -271,6 +271,8 @@ class SpeedportHybrid {
 	 * @return	array
 	 */
 	public function addPhoneBookEntry ($name, $firstname, $private, $work, $mobile, $id = -1) {
+		$this->checkLogin();
+		
 		$path = 'data/PhoneBook.json';
 		$fields = array(
 						'csrf_token' => $this->getToken(),
@@ -280,12 +282,12 @@ class SpeedportHybrid {
 						'phonebook_vorname' => $firstname,
 						'phonebook_number_p' => $private,
 						'phonebook_number_a' => $work,
-						'phonebook_number_m' => $mobile,
-						'action' => '1'
+						'phonebook_number_m' => $mobile
 						);
 		
 		$data = $this->sentRequest($path, $fields, true);
 		$data = $this->getValues($data['body']);
+		
 		if ($data['status'] == 'ok') {
 			return $data;
 		}
@@ -308,6 +310,36 @@ class SpeedportHybrid {
 	 */
 	public function changePhoneBookEntry ($id, $name, $firstname, $private, $work, $mobile) {
 		return $this->addPhoneBookEntry($name, $firstname, $private, $work, $private, $id);
+	}
+	
+	/**
+	 * delete Phone Book Entry
+	 *
+	 * @param	integer	$id
+	 *
+	 * @return	array
+	 */
+	public function deletePhoneBookEntry ($id) {
+		$this->checkLogin();
+		
+		$path = 'data/PhoneBook.json';
+		$fields = array(
+						'csrf_token' => $this->getToken(),
+						'id' => $id,
+						'deleteEntry' => 'delete'
+						);
+		
+		$data = $this->sentRequest($path, $fields, true);
+		$data = $this->getValues($data['body']);
+		print_r($data);
+		
+		if ($data['status'] == 'ok') {
+			return $data;
+		}
+		else {
+			throw new RouterException('can not delete Phone Book Entry');
+		}
+		
 	}
 	
 	/**
