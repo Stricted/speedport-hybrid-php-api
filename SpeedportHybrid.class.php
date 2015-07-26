@@ -194,7 +194,7 @@ class SpeedportHybrid {
 	 * @param	string	$status
 	 * @return	boolean
 	 */
-	public function changeConnectionStatus ($status) {
+	public function changeDSLStatus ($status) {
 		$this->checkLogin();
 		
 		$path = 'data/Connect.json';
@@ -210,6 +210,31 @@ class SpeedportHybrid {
 			else {
 				return false;
 			}
+		}
+		else {
+			throw new RouterException('unknown status');
+		}
+	}
+	
+	/**
+	 * change lte connection status
+	 * 
+	 * @param	string	$status
+	 * @return	boolean
+	 */
+	public function changeLTEStatus ($status) {
+		throw new Exception('unstable funtion');
+		$path = 'data/Modules.json';
+		
+		if ($status == '0' || $status == '1' || $status == 'yes' || $status == 'no') {
+			if ($status == 'yes') $status = '1';
+			else if ($status == 'no') $status = '0';
+			
+			$fields = array('csrf_token' => $this->token, 'use_lte' => $status);
+			$data = $this->sentEncryptedRequest($path, $fields, true);
+			
+			// debug only
+			return $data;
 		}
 		else {
 			throw new RouterException('unknown status');
