@@ -2,6 +2,9 @@
 require_once('RebootException.class.php');
 require_once('RouterException.class.php');
 require_once('CryptLib/CryptLib.php');
+require_once('Connection.class.php');
+require_once('Phone.class.php');
+require_once('System.class.php');
 
 /**
  * @author      Jan Altensen (Stricted)
@@ -9,6 +12,10 @@ require_once('CryptLib/CryptLib.php');
  * @copyright   2015 Jan Altensen (Stricted)
  */
 class SpeedportHybrid {
+	use Connection;
+	use Phone;
+	use System;
+	
 	/**
 	 * class version
 	 * @const	string
@@ -144,7 +151,7 @@ class SpeedportHybrid {
 		$this->checkLogin();
 		
 		$path = 'data/Login.json';
-		$fields = array('csrf_token' =>  $this->token, 'logout' => 'byby');
+		$fields = array('csrf_token' => $this->token, 'logout' => 'byby');
 		$data = $this->sentRequest($path, $fields, true);
 		$data = $this->getValues($data['body']);
 		if ((isset($data['status']) && $data['status'] == 'ok') && $this->checkLogin(false) === false) {
@@ -186,302 +193,6 @@ class SpeedportHybrid {
 		}
 		
 		return false;
-	}
-	
-	/**
-	 * change dsl connection status
-	 * 
-	 * @param	string	$status
-	 * @return	boolean
-	 */
-	public function changeDSLStatus ($status) {
-		$this->checkLogin();
-		
-		$path = 'data/Connect.json';
-		
-		if ($status == 'online' || $status == 'offline') {
-			$fields = array('csrf_token' => 'nulltoken', 'showpw' => 0, 'password' => $this->hash, 'req_connect' => $status);
-			$data = $this->sentRequest($path, $fields, true);
-			$data = $this->getValues($data['body']);
-			
-			if ($data['status'] == 'ok') {
-				return true;
-			}
-			else {
-				return false;
-			}
-		}
-		else {
-			throw new RouterException('unknown status');
-		}
-	}
-	
-	/**
-	 * change lte connection status
-	 * 
-	 * @param	string	$status
-	 * @return	boolean
-	 */
-	public function changeLTEStatus ($status) {
-		throw new Exception('unstable funtion');
-		$path = 'data/Modules.json';
-		
-		if ($status == '0' || $status == '1' || $status == 'yes' || $status == 'no') {
-			if ($status == 'yes') $status = '1';
-			else if ($status == 'no') $status = '0';
-			
-			$fields = array('csrf_token' => $this->token, 'use_lte' => $status);
-			$data = $this->sentEncryptedRequest($path, $fields, true);
-			
-			// debug only
-			return $data;
-		}
-		else {
-			throw new RouterException('unknown status');
-		}
-	}
-	
-	/**
-	 * get phone book entrys
-	 *
-	 * @return	array
-	 */
-	public function getPhoneBookEntrys () {
-		$data = $this->getData('PhoneBook');
-		$data = $this->getValues($data);
-		
-		if (isset($data['addbookentry'])) {
-			return $data['addbookentry'];
-		}
-		else {
-			return array();
-		}
-	}
-	
-	/**
-	 * add Phone Book Entry
-	 *
-	 * @param	string	$name
-	 * @param	string	$firstname
-	 * @param	string	$private
-	 * @param	string	$work
-	 * @param	string	$mobile
-	 * @param	integer	$id
-	 *
-	 * @return	array
-	 */
-	public function addPhoneBookEntry ($name, $firstname, $private, $work, $mobile, $id = -1) {
-		$this->checkLogin();
-		
-		$path = 'data/PhoneBook.json';
-		$fields = array(
-						'csrf_token' => $this->getToken(),
-						'id' => $id,
-						'search' => '',
-						'phonebook_name' => $name,
-						'phonebook_vorname' => $firstname,
-						'phonebook_number_p' => $private,
-						'phonebook_number_a' => $work,
-						'phonebook_number_m' => $mobile
-						);
-		
-		$data = $this->sentRequest($path, $fields, true);
-		$data = $this->getValues($data['body']);
-		
-		if ($data['status'] == 'ok') {
-			return $data;
-		}
-		else {
-			throw new RouterException('can not add/edit Phone Book Entry');
-		}
-	}
-	
-	/**
-	 * edit Phone Book Entry
-	 *
-	 * @param	integer	$id
-	 * @param	string	$name
-	 * @param	string	$firstname
-	 * @param	string	$private
-	 * @param	string	$work
-	 * @param	string	$mobile
-	 *
-	 * @return	array
-	 */
-	public function changePhoneBookEntry ($id, $name, $firstname, $private, $work, $mobile) {
-		return $this->addPhoneBookEntry($name, $firstname, $private, $work, $private, $id);
-	}
-	
-	/**
-	 * delete Phone Book Entry
-	 *
-	 * @param	integer	$id
-	 *
-	 * @return	array
-	 */
-	public function deletePhoneBookEntry ($id) {
-		$this->checkLogin();
-		
-		$path = 'data/PhoneBook.json';
-		$fields = array(
-						'csrf_token' => $this->getToken(),
-						'id' => $id,
-						'deleteEntry' => 'delete'
-						);
-		
-		$data = $this->sentRequest($path, $fields, true);
-		$data = $this->getValues($data['body']);
-		
-		if ($data['status'] == 'ok') {
-			return $data;
-		}
-		else {
-			throw new RouterException('can not delete Phone Book Entry');
-		}
-		
-	}
-	
-	/**
-	 * get uptime based on online (connection) time
-	 *
-	 * @return	string
-	 */
-	public function getUptime () {
-		$data = $this->getData('LAN');
-		$data = $this->getValues($data);
-		
-		return $data['days_online'];
-	}
-	
-	/**
-	 * return the given json as array
-	 * 
-	 * @param	string	$file
-	 * @return	array
-	 */
-	public function getData ($file) {
-		if ($file != 'Status') $this->checkLogin();
-		
-		$path = 'data/'.$file.'.json';
-		$fields = array();
-		$data = $this->sentRequest($path, $fields, true);
-		
-		return $data['body'];
-	}
-	
-	/**
-	 * get the router syslog
-	 * 
-	 * @return	array
-	 */
-	public function getSyslog() {
-		$data = $this->getData('SystemMessages');
-		$data = $this->getValues($data);
-		
-		if (isset($data['addmessage'])) {
-			return $data['addmessage'];
-		}
-		else {
-			return array();
-		}
-	}
-	
-	/**
-	 * get the Missed Calls from router
-	 * 
-	 * @return	array
-	 */
-	public function getMissedCalls() {
-		$data = $this->getData('PhoneCalls');
-		$data = $this->getValues($data);
-		
-		if (isset($data['addmissedcalls'])) {
-			return $data['addmissedcalls'];
-		}
-		else {
-			return array();
-		}
-	}
-	
-	/**
-	 * get the Taken Calls from router
-	 * 
-	 * @return	array
-	 */
-	public function getTakenCalls() {
-		$data = $this->getData('PhoneCalls');
-		$data = $this->getValues($data);
-		
-		if (isset($data['addtakencalls'])) {
-			return $data['addtakencalls'];
-		}
-		else {
-			return array();
-		}
-	}
-	
-	/**
-	 * get the Dialed Calls from router
-	 * 
-	 * @return	array
-	 */
-	public function getDialedCalls() {
-		$data = $this->getData('PhoneCalls');
-		$data = $this->getValues($data);
-		
-		if (isset($data['adddialedcalls'])) {
-			return $data['adddialedcalls'];
-		}
-		else {
-			return array();
-		}
-	}
-	
-	/**
-	 * reconnect LTE
-	 *
-	 * @return	array
-	 */
-	public function reconnectLte () {
-		$this->checkLogin();
-		
-		$path = 'data/modules.json';
-		$fields = array('csrf_token' => $this->token, 'lte_reconn' => '1');
-		$data = $this->sentEncryptedRequest($path, $fields, true);
-		
-		return $data['body'];
-	}
-	
-	/**
-	 * reset the router to Factory Default
-	 * not tested
-	 *
-	 * @return	array
-	 */
-	public function resetToFactoryDefault () {
-		$this->checkLogin();
-		
-		$path = 'data/resetAllSetting.json';
-		$fields = array('csrf_token' => 'nulltoken', 'showpw' => 0, 'password' => $this->hash, 'reset_all' => 'true');
-		$data = $this->sentRequest($path, $fields, true);
-		
-		return $data['body'];
-	}
-	
-	
-	/**
-	 * check if firmware is actual
-	 * 
-	 * @return	array
-	 */
-	public function checkFirmware () {
-		$this->checkLogin();
-		
-		$path = 'data/checkfirmware.json';
-		$fields = array('checkfirmware' => 'true');
-		$data = $this->sentRequest($path, $fields, true);
-		
-		return $data['body'];
 	}
 	
 	/**
