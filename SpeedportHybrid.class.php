@@ -259,6 +259,58 @@ class SpeedportHybrid {
 	}
 	
 	/**
+	 * add Phone Book Entry
+	 *
+	 * @param	string	$name
+	 * @param	string	$firstname
+	 * @param	string	$private
+	 * @param	string	$work
+	 * @param	string	$mobile
+	 * @param	integer	$id
+	 *
+	 * @return	array
+	 */
+	public function addPhoneBookEntry ($name, $firstname, $private, $work, $mobile, $id = -1) {
+		$path = 'data/PhoneBook.json';
+		$fields = array(
+						'csrf_token' => $this->getToken(),
+						'id' => $id,
+						'search' => '',
+						'phonebook_name' => $name,
+						'phonebook_vorname' => $firstname,
+						'phonebook_number_p' => $private,
+						'phonebook_number_a' => $work,
+						'phonebook_number_m' => $mobile,
+						'action' => '1'
+						);
+		
+		$data = $this->sentRequest($path, $fields, true);
+		$data = $this->getValues($data['body']);
+		if ($data['status'] == 'ok') {
+			return $data;
+		}
+		else {
+			throw new RouterException('can not add/edit Phone Book Entry');
+		}
+	}
+	
+	/**
+	 * edit Phone Book Entry
+	 *
+	 * @param	integer	$id
+	 * @param	string	$name
+	 * @param	string	$firstname
+	 * @param	string	$private
+	 * @param	string	$work
+	 * @param	string	$mobile
+	 *
+	 * @return	array
+	 */
+	public function changePhoneBookEntry ($id, $name, $firstname, $private, $work, $mobile) {
+		return $this->addPhoneBookEntry($name, $firstname, $private, $work, $private, $id);
+	}
+	
+	/**
 	 * get uptime based on online (connection) time
 	 *
 	 * @return	string
@@ -515,7 +567,7 @@ class SpeedportHybrid {
 		}
 		
 		if ($cookie === true) {
-			curl_setopt($ch, CURLOPT_COOKIE, 'lang=en; challengev='.$this->challenge.'; '.$this->cookie);
+			curl_setopt($ch, CURLOPT_COOKIE, 'challengev='.$this->challenge.'; '.$this->cookie);
 		}
 		
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
