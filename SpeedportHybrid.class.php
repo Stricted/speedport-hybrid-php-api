@@ -1,12 +1,12 @@
 <?php
-require_once('RebootException.class.php');
-require_once('RouterException.class.php');
+require_once('lib/exception/RebootException.class.php');
+require_once('lib/exception/RouterException.class.php');
 require_once('CryptLib/CryptLib.php');
-require_once('Connection.class.php');
-require_once('CryptLib.class.php');
-require_once('Login.class.php');
-require_once('Phone.class.php');
-require_once('System.class.php');
+require_once('lib/trait/Connection.class.php');
+require_once('lib/trait/CryptLib.class.php');
+require_once('lib/trait/Login.class.php');
+require_once('lib/trait/Phone.class.php');
+require_once('lib/trait/System.class.php');
 
 /**
  * @author      Jan Altensen (Stricted)
