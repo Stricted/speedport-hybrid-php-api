@@ -10,39 +10,42 @@ Access Speedport Hybrid Router through PHP
 ---
 This project is licensed under [GNU LESSER GENERAL PUBLIC LICENSE Version 3](https://github.com/Stricted/speedport-hybrid-php-api/blob/master/LICENSE).
 
-known valid paths for getData() :
- * data/dsl.json
- * data/interfaces.json
- * data/arp.json
- * data/session.json
- * data/dhcp_client.json
- * data/dhcp_server.json
- * data/ipv6.json
- * data/dns.json
- * data/routing.json
- * data/igmp_proxy.json
- * data/igmp_snooping.json
- * data/wlan.json
- * data/module.json
- * data/memory.json
- * data/speed.json
- * data/webdav.json
- * data/bonding_client.json
- * data/bonding_tunnel.json
- * data/filterlist.json
- * data/bonding_tr181.json
- * data/letinfo.json
- * data/Connect.json
- * data/WLANBasic.json
- * data/WLANAccess.json
- * data/LAN.json
- * data/NASLight.json
- * data/INetIP.json
- * data/FilterAndTime.json
- * data/Portforwarding.json
- * data/DynDNS.json
- * data/Overview.json
- * data/Status.json
+known $file values for getData() :
+ * dsl
+ * interfaces
+ * arp
+ * session
+ * dhcp_client
+ * dhcp_server
+ * ipv6
+ * dns
+ * routing
+ * igmp_proxy
+ * igmp_snooping
+ * wlan
+ * module
+ * memory
+ * speed
+ * webdav
+ * bonding_client
+ * bonding_tunnel
+ * filterlist
+ * bonding_tr181
+ * letinfo
+ * Connect
+ * WLANBasic
+ * WLANAccess
+ * LAN
+ * NASLight
+ * INetIP
+ * FilterAndTime
+ * Portforwarding
+ * PhoneBook
+ * PhoneCalls
+ * SystemMessages
+ * DynDNS
+ * Overview
+ * Status
  
 PHP requirements
 ============= 
