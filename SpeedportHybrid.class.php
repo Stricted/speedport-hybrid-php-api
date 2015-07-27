@@ -5,6 +5,7 @@ require_once('CryptLib/CryptLib.php');
 require_once('lib/trait/Connection.class.php');
 require_once('lib/trait/CryptLib.class.php');
 require_once('lib/trait/Login.class.php');
+require_once('lib/trait/Firewall.class.php');
 require_once('lib/trait/Network.class.php');
 require_once('lib/trait/Phone.class.php');
 require_once('lib/trait/System.class.php');
@@ -17,6 +18,7 @@ require_once('lib/trait/System.class.php');
 class SpeedportHybrid {
 	use Connection;
 	use CryptLib;
+	use Firewall;
 	use Login;
 	use Network;
 	use Phone;
@@ -52,6 +54,8 @@ class SpeedportHybrid {
 	private function getValues($array) {
 		$data = array();
 		foreach ($array as $item) {
+			if (!isset($item['vartype']) || !isset($item['varid']) || !isset($item['varvalue'])) continue;
+			
 			// thank you telekom for this piece of shit
 			if ($item['vartype'] == 'template') {
 				if (is_array($item['varvalue'])) {
