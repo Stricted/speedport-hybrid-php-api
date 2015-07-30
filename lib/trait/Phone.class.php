@@ -122,7 +122,7 @@ trait Phone {
 			$data['missedcalls_date'] = $exp[0];
 			$data['missedcalls_time'] = $exp[1];
 			$data['missedcalls_who'] = $exp[2];
-			$c = $c -1;
+			$c--;
 			$calls[] = $data;
 		}
 		
@@ -150,7 +150,7 @@ trait Phone {
 			$data['takencalls_time'] = $exp[1];
 			$data['takencalls_who'] = $exp[2];
 			$data['takencalls_duration'] = $exp[3];
-			$c = $c -1;
+			$c--;
 			$calls[] = $data;
 		}
 		
@@ -179,7 +179,7 @@ trait Phone {
 			$data['dialedcalls_time'] = $exp[1];
 			$data['dialedcalls_who'] = $exp[2];
 			$data['dialedcalls_duration'] = $exp[3];
-			$c = $c -1;
+			$c--;
 			$calls[] = $data;
 		}
 		
