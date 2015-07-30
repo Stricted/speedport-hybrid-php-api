@@ -108,15 +108,25 @@ trait Phone {
 	 * @return	array
 	 */
 	public function getMissedCalls() {
-		$data = $this->getData('PhoneCalls');
-		$data = $this->getValues($data);
+		$lines = $this->exportData('1');
+		$calls = array();
+		$c = count($lines) -2;
 		
-		if (isset($data['addmissedcalls'])) {
-			return $data['addmissedcalls'];
+		foreach ($lines as $line) {
+			if (empty($line) || strpos($line, 'Date') !== false) continue;
+			
+			$exp = explode(' ', $line);
+			
+			$data = array();
+			$data['id'] = $c;
+			$data['missedcalls_date'] = $exp[0];
+			$data['missedcalls_time'] = $exp[1];
+			$data['missedcalls_who'] = $exp[2];
+			$c = $c -1;
+			$calls[] = $data;
 		}
-		else {
-			return array();
-		}
+		
+		return $calls;
 	}
 	
 	/**
@@ -125,15 +135,27 @@ trait Phone {
 	 * @return	array
 	 */
 	public function getTakenCalls() {
-		$data = $this->getData('PhoneCalls');
-		$data = $this->getValues($data);
+		$lines = $this->exportData('2');
+		$calls = array();
+		$c = count($lines) -2;
 		
-		if (isset($data['addtakencalls'])) {
-			return $data['addtakencalls'];
+		foreach ($lines as $line) {
+			if (empty($line) || strpos($line, 'Date') !== false) continue;
+			
+			$exp = explode(' ', $line);
+			
+			$data = array();
+			$data['id'] = $c;
+			$data['takencalls_date'] = $exp[0];
+			$data['takencalls_time'] = $exp[1];
+			$data['takencalls_who'] = $exp[2];
+			$data['takencalls_duration'] = $exp[3];
+			$c = $c -1;
+			$calls[] = $data;
 		}
-		else {
-			return array();
-		}
+		
+		return $calls;
+		
 	}
 	
 	/**
@@ -142,14 +164,40 @@ trait Phone {
 	 * @return	array
 	 */
 	public function getDialedCalls() {
-		$data = $this->getData('PhoneCalls');
-		$data = $this->getValues($data);
+		$lines = $this->exportData('3');
+		$calls = array();
+		$c = count($lines) -2;
 		
-		if (isset($data['adddialedcalls'])) {
-			return $data['adddialedcalls'];
+		foreach ($lines as $line) {
+			if (empty($line) || strpos($line, 'Date') !== false) continue;
+			
+			$exp = explode(' ', $line);
+			
+			$data = array();
+			$data['id'] = $c;
+			$data['dialedcalls_date'] = $exp[0];
+			$data['dialedcalls_time'] = $exp[1];
+			$data['dialedcalls_who'] = $exp[2];
+			$data['dialedcalls_duration'] = $exp[3];
+			$c = $c -1;
+			$calls[] = $data;
 		}
-		else {
-			return array();
-		}
+		
+		return $calls;
+	}
+	
+	/**
+	 * export data from router
+	 * 
+	 * @return	array
+	 */
+	private function exportData ($type) {
+		$this->checkLogin();
+		
+		$path = 'data/Syslog.json';
+		$fields = array('exporttype' => $type);
+		$data = $this->sentRequest($path, $fields, true);
+		
+		return explode("\n", $data['body']);
 	}
 }

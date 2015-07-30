@@ -76,6 +76,24 @@ trait Firewall {
 		 * udp_private_to
 		 * portuwudp_id = -1
 		 */
+		/*
+		var inputs = $("input[name^='tcp_public_'], input[name^='tcp_private_'], input[name^='udp_public_'], input[name^='udp_private_']");
+		var updateToField = function() {
+			var field = $(this);
+			var prefix = field.is("[name^='tcp_']") ? "tcp" : "udp";
+			var cont = field.closest("div[id^='template_add']");
+			var pv = parseInt(cont.find("input[name^='"+prefix+"_public_from']").val());
+			var pt = parseInt(cont.find("input[name^='"+prefix+"_public_to']").val());
+			var pp = parseInt(cont.find("input[name^='"+prefix+"_private_dest']").val());
+			var result = "";
+			if (!isNaN(pv) && !isNaN(pt) && !isNaN(pp)) {
+				if (pv <= pt) {
+					result = pp + pt - pv;
+				}
+			}
+			cont.find("input[name^='"+prefix+"_private_to']").val(result);
+		};
+		*/
 	}
 	
 	/**

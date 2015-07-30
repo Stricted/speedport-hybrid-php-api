@@ -136,7 +136,11 @@ class SpeedportHybrid {
 		
 		// decode json
 		if (strpos($url, '.json') !== false) {
-			$body = json_decode($body, true);
+			$json = json_decode($body, true);
+			
+			if (is_array($json)) {
+				$body = $json;
+			}
 		}
 		
 		return array('header' => $this->parse_headers($header), 'body' => $body);
