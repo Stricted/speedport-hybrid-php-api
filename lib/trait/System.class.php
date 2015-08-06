@@ -11,7 +11,7 @@ trait System {
 	 * @return	string
 	 */
 	public function getUptime () {
-		$data = $this->getData('LAN');
+		$data = $this->getData('Overview');
 		$data = $this->getValues($data);
 		
 		return $data['days_online'];
