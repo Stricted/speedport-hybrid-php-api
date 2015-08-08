@@ -43,6 +43,31 @@ class SpeedportHybrid {
 	 */
 	public function __construct ($url = 'http://speedport.ip/') {
 		$this->url = $url;
+		$this->checkRequirements();
+	}
+	
+	/**
+	 * check php requirements
+	 */
+	private function checkRequirements () {
+		if (!extension_loaded('curl')) {
+			throw new Exception("The PHP Extension 'curl' is missing.");
+		}
+		else if (!extension_loaded('json')) {
+			throw new Exception("The PHP Extension 'json' is missing.");
+		}
+		else if (!extension_loaded('pcre')) {
+			throw new Exception("The PHP Extension 'pcre' is missing.");
+		}
+		else if (!extension_loaded('ctype')) {
+			throw new Exception("The PHP Extension 'ctype' is missing.");
+		}
+		else if (!extension_loaded('hash')) {
+			throw new Exception("The PHP Extension 'hash' is missing.");
+		}
+		else if (!in_array('sha256', hash_algos())) {
+			throw new Exception('SHA-256 algorithm is not Supported.');
+		}
 	}
 	
 	/**

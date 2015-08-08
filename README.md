@@ -53,6 +53,11 @@ known endpoints for getData() and sentRequest():
 PHP requirements
 ============= 
  * PHP >= 5.4.0
+ * PHP extension `hash`
+ * PHP extension `curl`
+ * PHP extension `json`
+ * PHP extension `pcre`
+ * PHP extension `ctype`
  * PHP extension `rrd` (optional, for rrd graphs)
 
 rrdtool integration
