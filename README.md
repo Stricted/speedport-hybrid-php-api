@@ -1,16 +1,16 @@
-### speedport hybrid php api
+### speedport php api
 
-[![Build Status](https://travis-ci.org/Stricted/speedport-hybrid-php-api.svg)](https://travis-ci.org/Stricted/speedport-hybrid-php-api) [![Release](https://img.shields.io/github/release/Stricted/speedport-hybrid-php-api.svg?style=flat-square)](https://github.com/Stricted/speedport-hybrid-php-api/releases/latest) [![License](https://img.shields.io/badge/license-LGPLv3-brightgreen.svg?style=flat-square)](https://github.com/Stricted/speedport-hybrid-php-api/blob/master/LICENSE)
+[![Build Status](https://travis-ci.org/Stricted/speedport-hybrid-php-api.svg?branch=test)](https://travis-ci.org/Stricted/speedport-hybrid-php-api) [![Release](https://img.shields.io/github/release/Stricted/speedport-hybrid-php-api.svg)](https://github.com/Stricted/speedport-hybrid-php-api/releases/latest) [![License](https://img.shields.io/badge/license-LGPLv3-brightgreen.svg)](https://github.com/Stricted/speedport-hybrid-php-api/blob/master/LICENSE)
 
-Access Speedport Hybrid Router through PHP
+Access Speedport Router through PHP
 
-**THIS CLASS IS ONLY FOR SPEEDPORT HYBRID**
+This is an **EXPERIMENTAL** branch to support other speedport router, i dont have them so feel free to test it and report any error
 
 ### License
 ---
 This project is licensed under [GNU LESSER GENERAL PUBLIC LICENSE Version 3](https://github.com/Stricted/speedport-hybrid-php-api/blob/master/LICENSE).
 
-known endpoints for getData() and sentRequest():
+known endpoints for getData() and sentRequest() (only for `Speedport Hybrid`):
 
 | Endpoint       |
 | -------------- |
