@@ -10,48 +10,52 @@ Access Speedport Hybrid Router through PHP
 ---
 This project is licensed under [GNU LESSER GENERAL PUBLIC LICENSE Version 3](https://github.com/Stricted/speedport-hybrid-php-api/blob/master/LICENSE).
 
-known $file values for getData() :
- * dsl
- * interfaces
- * arp
- * session
- * dhcp_client
- * dhcp_server
- * ipv6
- * dns
- * routing
- * igmp_proxy
- * igmp_snooping
- * wlan
- * module
- * memory
- * speed
- * webdav
- * bonding_client
- * bonding_tunnel
- * filterlist
- * bonding_tr181
- * letinfo
- * Connect
- * WLANBasic
- * WLANAccess
- * LAN
- * NASLight
- * INetIP
- * FilterAndTime
- * Portforwarding
- * PhoneBook
- * PhoneCalls
- * SystemMessages
- * DynDNS
- * Overview
- * Status
+known endpoints for getData() and sentRequest():
+| Endpoint       |
+| -------------- |
+| dsl            |
+| interfaces     |
+| arp            |
+| session        |
+| dhcp_client    |
+| dhcp_server    |
+| ipv6           |
+| dns            |
+| routing        |
+| igmp_proxy     |
+| igmp_snooping  |
+| wlan           |
+| module         |
+| memory         |
+| speed          |
+| webdav         |
+| bonding_client |
+| bonding_tunnel |
+| filterlist     |
+| bonding_tr181  |
+| lteinfo        |
+| status         |
+| Connect        |
+| WLANBasic      |
+| WLANAccess     |
+| LAN            |
+| NASLight       |
+| INetIP         |
+| FilterAndTime  |
+| Portforwarding |
+| PhoneBook      |
+| PhoneCalls     |
+| SystemMessages |
+| DynDNS         |
+| Overview       |
+
+
+
  
 PHP requirements
 ============= 
  * PHP >= 5.4.0
- * PHP extension `rrd` (for rrd graphs)
- * PHP extension `mcrypt`
+ * PHP extension `rrd` (optional, for rrd graphs)
 
 rrdtool integration
 =============
