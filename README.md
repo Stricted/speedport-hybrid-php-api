@@ -11,6 +11,7 @@ Access Speedport Hybrid Router through PHP
 This project is licensed under [GNU LESSER GENERAL PUBLIC LICENSE Version 3](https://github.com/Stricted/speedport-hybrid-php-api/blob/master/LICENSE).
 
 known endpoints for getData() and sentRequest():
+
 | Endpoint       |
 | -------------- |
 | dsl            |
@@ -49,9 +50,6 @@ known endpoints for getData() and sentRequest():
 | DynDNS         |
 | Overview       |
 
-
-
- 
 PHP requirements
 ============= 
  * PHP >= 5.4.0
