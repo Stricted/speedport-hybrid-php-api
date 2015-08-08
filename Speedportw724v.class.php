@@ -9,6 +9,12 @@ require_once('SpeedportHybrid.class.php');
  * @copyright   2015 Jan Altensen (Stricted)
  */
 class Speedportw724v extends SpeedportHybrid implements ISpeedport {
+	/**
+	 * login into the router with the given password
+	 * 
+	 * @param	string	$password
+	 * @return	boolean
+	 */
 	public function login ($password) {
 		/* this is experimental, i dont have a speedport w724v so i cant test this
 		 * feel free to test it and report if it dosent work
@@ -31,6 +37,15 @@ class Speedportw724v extends SpeedportHybrid implements ISpeedport {
 		}
 		
 		return false;
+	}
+	
+	/**
+	 * get the csrf_token
+	 * 
+	 * @return	string
+	 */
+	protected function getToken () {
+		// TODO: check if this is needed
 	}
 	
 	/**

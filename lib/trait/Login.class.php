@@ -57,7 +57,7 @@ trait Login {
 		$fields = array('csrf_token' => 'nulltoken', 'showpw' => 0, 'challengev' => 'null');
 		$data = $this->sentRequest($path, $fields);
 		$data = $this->getValues($data['body']);
-		print_r($data);
+		
 		if (isset($data['challengev']) && !empty($data['challengev'])) {
 			return $data['challengev'];
 		}

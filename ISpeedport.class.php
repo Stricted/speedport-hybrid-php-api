@@ -15,8 +15,13 @@ interface ISpeedport {
 	
 	/**
 	 * get the csrf_token
-	 * 
-	 * @return	string
 	 */
-	protected function getToken ();
+	public function getToken ();
+	
+	/**
+	 * check if we are logged in
+	 *
+	 * @param	boolean	$exception
+	 */
+	public function checkLogin ($exception = true);
 }
