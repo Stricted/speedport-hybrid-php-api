@@ -1,4 +1,6 @@
 <?php
+require_once('ISpeedport.class.php');
+require_once('lib/exception/RouterException.class.php');
 require_once('SpeedportHybrid.class.php');
 
 /**
@@ -6,7 +8,7 @@ require_once('SpeedportHybrid.class.php');
  * @license     GNU Lesser General Public License <http://opensource.org/licenses/lgpl-license.php>
  * @copyright   2015 Jan Altensen (Stricted)
  */
-class Speedportw724v extends SpeedportHybrid {
+class Speedportw724v extends SpeedportHybrid implements ISpeedport {
 	public function login ($password) {
 		/* this is experimental, i dont have a speedport w724v so i cant test this
 		 * feel free to test it and report if it dosent work
@@ -18,11 +20,48 @@ class Speedportw724v extends SpeedportHybrid {
 		$json = $this->getValues($data['body']);
 		
 		if (isset($json['login']) && $json['login'] == 'success') {
-			$this->cookie = $data['header']['Set-Cookie'];
+			if (isset($data['header']['Set-Cookie']) && !empty($data['header']['Set-Cookie'])) {
+				$this->cookie = $data['header']['Set-Cookie'];
+			}
+			else {
+				throw new RouterException('unable to get the session cookie from the router');
+			}
 			
 			return true;
 		}
 		
 		return false;
+	}
+	
+	/**
+	 * sends the request to router
+	 * 
+	 * @param	string	$path
+	 * @param	mixed	$fields
+	 * @param	string	$cookie
+	 * @param	integer	$count
+	 * @return	array
+	 */
+	protected function sentRequest ($path, $fields, $cookie = false, $count = 0) {
+		$data = parent::sentRequest($path, $fields, $cookie, $count);
+		$header = $data['header'];
+		$body = $data['body'];
+		
+		// fix invalid json
+		$body = preg_replace("/(\r\n)|(\r)/", "\n", $body);
+		$body = preg_replace('/\'/i', '"', $body);
+		$body = preg_replace("/\[\s+\]/i", '[ {} ]', $body);
+		$body = preg_replace("/},\s+]/", "}\n]", $body);
+		
+		// decode json
+		if (strpos($path, '.json') !== false) {
+			$json = json_decode($body, true);
+			
+			if (is_array($json)) {
+				$body = $json;
+			}
+		}
+		
+		return array('header' => $header, 'body' => $body);
 	}
 }

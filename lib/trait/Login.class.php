@@ -12,24 +12,6 @@ trait Login {
 	private $challenge = '';
 	
 	/**
-	 * csrf_token
-	 * @var	string
-	 */
-	private $token = '';
-	
-	/**
-	 * hashed password
-	 * @var	string
-	 */
-	private $hash = '';
-	
-	/**
-	 * session cookie
-	 * @var	string
-	 */
-	private $cookie = '';
-	
-	/**
 	 * derivedk cookie
 	 * @var	string
 	 */
@@ -51,7 +33,8 @@ trait Login {
 		$json = $this->getValues($data['body']);
 		
 		if (isset($json['login']) && $json['login'] == 'success') {
-			$this->cookie = $this->getCookie($data);
+			$this->cookie = 'challengev='.$this->challenge.'; ';
+			$this->cookie .= $this->getCookie($data);
 			
 			$this->derivedk = $this->getDerviedk($password);
 			
@@ -74,7 +57,7 @@ trait Login {
 		$fields = array('csrf_token' => 'nulltoken', 'showpw' => 0, 'challengev' => 'null');
 		$data = $this->sentRequest($path, $fields);
 		$data = $this->getValues($data['body']);
-		
+		print_r($data);
 		if (isset($data['challengev']) && !empty($data['challengev'])) {
 			return $data['challengev'];
 		}
@@ -145,7 +128,7 @@ trait Login {
 	 * 
 	 * @return	string
 	 */
-	private function getToken () {
+	protected function getToken () {
 		$this->checkLogin();
 		
 		$path = 'html/content/overview/index.html';

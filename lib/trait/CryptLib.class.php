@@ -6,20 +6,6 @@
  */
 trait CryptLib {
 	/**
-	 * sends the encrypted request to router
-	 * 
-	 * @param	string	$path
-	 * @param	mixed	$fields
-	 * @param	string	$cookie
-	 * @return	array
-	 */
-	private function sentEncryptedRequest ($path, $fields, $cookie = false) {
-		$count = count($fields);
-		$fields = $this->encrypt(http_build_query($fields));
-		return $this->sentRequest($path, $fields, $cookie, $count);
-	}
-	
-	/**
 	 * decrypt data from router
 	 * 
 	 * @param	string	$data
