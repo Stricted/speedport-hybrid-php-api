@@ -40,12 +40,81 @@ class Speedportw724v extends SpeedportHybrid implements ISpeedport {
 	}
 	
 	/**
+	 * check if we are logged in
+	 *
+	 * @param	boolean	$exception
+	 * @return	boolean
+	 */
+	public function checkLogin ($exception = true) {
+		// check if session is empty
+		if (empty($this->cookie)) {
+			if ($exception === true) {
+				throw new RouterException('you musst be logged in to use this method');
+			}
+			
+			return false;
+		}
+		
+		$path = 'data/SecureStatus.json';
+		$fields = array();
+		$data = $this->sentRequest($path, $fields, true);
+		$data = $this->getValues($data['body']);
+		
+		if ($data['loginstate'] != 1) {
+			if ($exception === true) {
+				throw new RouterException('you musst be logged in to use this method');
+			}
+			
+			return false;
+		}
+		
+		return true;
+	}
+	
+	/**
+	 * logout
+	 * 
+	 * @return	boolean
+	 */
+	public function logout () {
+		$this->checkLogin();
+		
+		$path = 'data/Login.json';
+		$fields = array('csrf_token' => $this->token, 'logout' => 'byby');
+		$data = $this->sentRequest($path, $fields, true);
+		$data = $this->getValues($data['body']);
+		if ((isset($data['status']) && $data['status'] == 'ok') && $this->checkLogin(false) === false) {
+			// reset challenge and session
+			$this->cookie = '';
+			$this->token = '';
+			
+			return true;
+		}
+		
+		return false;
+	}
+	
+	/**
 	 * get the csrf_token
 	 * 
 	 * @return	string
 	 */
 	protected function getToken () {
-		// TODO: check if this is needed
+		$this->checkLogin();
+		
+		$path = 'html/content/overview/index.html';
+		$fields = array();
+		$data = $this->sentRequest($path, $fields, true);
+		
+		$a = explode('csrf_token = "', $data['body']);
+		$a = explode('";', $a[1]);
+		
+		if (isset($a[0]) && !empty($a[0])) {
+			return $a[0];
+		}
+		else {
+			throw new RouterException('unable to get csrf_token');
+		}
 	}
 	
 	/**
