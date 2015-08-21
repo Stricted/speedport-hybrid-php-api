@@ -175,8 +175,7 @@ trait Login {
 		// calculate derivedk
 		if (!function_exists('hash_pbkdf2')) {
 			$pbkdf2 = new CryptLib\Key\Derivation\PBKDF\PBKDF2(array('hash' => 'sha1'));
-			$derivedk = bin2hex($pbkdf2->derive(hash('sha256', $password), substr($this->challenge, 0, 16), 1000, 32));
-			$derivedk = substr($derivedk, 0, 32);
+			$derivedk = bin2hex($pbkdf2->derive(hash('sha256', $password), substr($this->challenge, 0, 16), 1000, 16));
 		}
 		else {
 			$derivedk = hash_pbkdf2('sha1', hash('sha256', $password), substr($this->challenge, 0, 16), 1000, 32);
