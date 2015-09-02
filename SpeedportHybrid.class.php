@@ -1,6 +1,7 @@
 <?php
 require_once('lib/exception/RebootException.class.php');
 require_once('lib/exception/RouterException.class.php');
+require_once('lib/exception/NotImplementedException.class.php');
 require_once('CryptLib/CryptLib.php');
 require_once('lib/trait/Connection.class.php');
 require_once('lib/trait/CryptLib.class.php');
@@ -28,7 +29,7 @@ class SpeedportHybrid {
 	 * class version
 	 * @const	string
 	 */
-	const VERSION = '1.0.4';
+	const VERSION = '1.0.5';
 	
 	/**
 	 * router url

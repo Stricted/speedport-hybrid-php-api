@@ -14,8 +14,6 @@ trait Firewall {
 		$data = $this->getData('Portforwarding');
 		$data = $this->getValues($data);
 		
-		//print_r($data);
-		
 		if (isset($data['addportuw'])) {
 			return $data['addportuw'];
 		}
@@ -58,6 +56,8 @@ trait Firewall {
 	 * @param	integer	$device
 	 */
 	public function addPortforwardingEntry ($name, $device) {
+		throw new NotImplementedException();
+		
 		// TODO: find a way to make this possible
 		/* fields:
 		 * 
@@ -104,6 +104,7 @@ trait Firewall {
 	 * @param	integer	$device
 	 */
 	public function editPortforwardingEntry ($id, $name, $device) {
+		throw new NotImplementedException();
 		// TODO: find a way to make this possible
 	}
 }
