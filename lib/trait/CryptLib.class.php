@@ -13,10 +13,10 @@ trait CryptLib {
 	 * @param	string	$cookie
 	 * @return	array
 	 */
-	private function sentEncryptedRequest ($path, $fields, $cookie = false) {
+	private function sendEncryptedRequest ($path, $fields, $cookie = false) {
 		$count = count($fields);
 		$fields = $this->encrypt(http_build_query($fields));
-		return $this->sentRequest($path, $fields, $cookie, $count);
+		return $this->sendRequest($path, $fields, $cookie, $count);
 	}
 	
 	/**

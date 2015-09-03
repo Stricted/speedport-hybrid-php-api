@@ -48,7 +48,7 @@ trait Phone {
 						'phonebook_number_m' => $mobile
 						);
 		
-		$data = $this->sentRequest($path, $fields, true);
+		$data = $this->sendRequest($path, $fields, true);
 		$data = $this->getValues($data['body']);
 		
 		if ($data['status'] == 'ok') {
@@ -91,7 +91,7 @@ trait Phone {
 						'deleteEntry' => 'delete'
 						);
 		
-		$data = $this->sentRequest($path, $fields, true);
+		$data = $this->sendRequest($path, $fields, true);
 		$data = $this->getValues($data['body']);
 		
 		if ($data['status'] == 'ok') {

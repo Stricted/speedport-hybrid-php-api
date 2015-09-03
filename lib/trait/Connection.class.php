@@ -18,7 +18,7 @@ trait Connection {
 		
 		if ($status == 'online' || $status == 'offline') {
 			$fields = array('csrf_token' => 'nulltoken', 'showpw' => 0, 'password' => $this->hash, 'req_connect' => $status);
-			$data = $this->sentRequest($path, $fields, true);
+			$data = $this->sendRequest($path, $fields, true);
 			$data = $this->getValues($data['body']);
 			
 			if ($data['status'] == 'ok') {
@@ -48,7 +48,7 @@ trait Connection {
 			else if ($status == 'no') $status = '0';
 			
 			$fields = array('csrf_token' => $this->token, 'use_lte' => $status);
-			$data = $this->sentEncryptedRequest($path, $fields, true);
+			$data = $this->sendEncryptedRequest($path, $fields, true);
 			
 			// debug only
 			return $data;
@@ -68,7 +68,7 @@ trait Connection {
 		
 		$path = 'data/modules.json';
 		$fields = array('csrf_token' => $this->token, 'lte_reconn' => '1');
-		$data = $this->sentEncryptedRequest($path, $fields, true);
+		$data = $this->sendEncryptedRequest($path, $fields, true);
 		
 		return $data['body'];
 	}

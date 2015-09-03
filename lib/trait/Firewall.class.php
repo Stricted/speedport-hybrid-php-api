@@ -38,7 +38,7 @@ trait Firewall {
 						'deleteEntry' => 'delete'
 						);
 		
-		$data = $this->sentRequest($path, $fields, true);
+		$data = $this->sendRequest($path, $fields, true);
 		$data = $this->getValues($data['body']);
 		
 		if ($data['status'] == 'ok') {

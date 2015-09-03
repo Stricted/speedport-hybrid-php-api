@@ -114,7 +114,7 @@ class SpeedportHybrid {
 	 * @param	integer	$count
 	 * @return	array
 	 */
-	private function sentRequest ($path, $fields, $cookie = false, $count = 0) {
+	private function sendRequest ($path, $fields, $cookie = false, $count = 0) {
 		$url = $this->url.$path.'?lang=en';
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL, $url);

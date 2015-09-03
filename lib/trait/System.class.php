@@ -28,7 +28,7 @@ trait System {
 		
 		$path = 'data/'.$file.'.json';
 		$fields = array();
-		$data = $this->sentRequest($path, $fields, true);
+		$data = $this->sendRequest($path, $fields, true);
 		
 		return $data['body'];
 	}
@@ -61,7 +61,7 @@ trait System {
 		
 		$path = 'data/resetAllSetting.json';
 		$fields = array('csrf_token' => 'nulltoken', 'showpw' => 0, 'password' => $this->hash, 'reset_all' => 'true');
-		$data = $this->sentRequest($path, $fields, true);
+		$data = $this->sendRequest($path, $fields, true);
 		
 		return $data['body'];
 	}
@@ -77,7 +77,7 @@ trait System {
 		
 		$path = 'data/checkfirmware.json';
 		$fields = array('checkfirmware' => 'true');
-		$data = $this->sentRequest($path, $fields, true);
+		$data = $this->sendRequest($path, $fields, true);
 		
 		return $data['body'];
 	}
@@ -92,7 +92,7 @@ trait System {
 		
 		$path = 'data/Reboot.json';
 		$fields = array('csrf_token' => $this->token, 'reboot_device' => 'true');
-		$data = $this->sentEncryptedRequest($path, $fields, true);
+		$data = $this->sendEncryptedRequest($path, $fields, true);
 		$data = $this->getValues($data['body']);
 		
 		if ($data['status'] == 'ok') {

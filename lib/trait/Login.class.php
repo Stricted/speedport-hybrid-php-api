@@ -47,7 +47,7 @@ trait Login {
 		$path = 'data/Login.json';
 		$this->hash = hash('sha256', $this->challenge.':'.$password);
 		$fields = array('csrf_token' => 'nulltoken', 'showpw' => 0, 'password' => $this->hash);
-		$data = $this->sentRequest($path, $fields);
+		$data = $this->sendRequest($path, $fields);
 		$json = $this->getValues($data['body']);
 		
 		if (isset($json['login']) && $json['login'] == 'success') {
@@ -72,7 +72,7 @@ trait Login {
 	private function getChallenge () {
 		$path = 'data/Login.json';
 		$fields = array('csrf_token' => 'nulltoken', 'showpw' => 0, 'challengev' => 'null');
-		$data = $this->sentRequest($path, $fields);
+		$data = $this->sendRequest($path, $fields);
 		$data = $this->getValues($data['body']);
 		
 		if (isset($data['challengev']) && !empty($data['challengev'])) {
@@ -101,7 +101,7 @@ trait Login {
 		
 		$path = 'data/SecureStatus.json';
 		$fields = array();
-		$data = $this->sentRequest($path, $fields, true);
+		$data = $this->sendRequest($path, $fields, true);
 		$data = $this->getValues($data['body']);
 		
 		if ($data['loginstate'] != 1) {
@@ -125,7 +125,7 @@ trait Login {
 		
 		$path = 'data/Login.json';
 		$fields = array('csrf_token' => $this->token, 'logout' => 'byby');
-		$data = $this->sentRequest($path, $fields, true);
+		$data = $this->sendRequest($path, $fields, true);
 		$data = $this->getValues($data['body']);
 		if ((isset($data['status']) && $data['status'] == 'ok') && $this->checkLogin(false) === false) {
 			// reset challenge and session
@@ -150,7 +150,7 @@ trait Login {
 		
 		$path = 'html/content/overview/index.html';
 		$fields = array();
-		$data = $this->sentRequest($path, $fields, true);
+		$data = $this->sendRequest($path, $fields, true);
 		
 		$a = explode('csrf_token = "', $data['body']);
 		$a = explode('";', $a[1]);
