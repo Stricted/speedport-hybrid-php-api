@@ -24,13 +24,12 @@ trait Connection {
 			if ($data['status'] == 'ok') {
 				return true;
 			}
-			else {
-				return false;
-			}
 		}
 		else {
 			throw new RouterException('unknown status');
 		}
+		
+		return false;
 	}
 	
 	/**
@@ -40,7 +39,11 @@ trait Connection {
 	 * @return	boolean
 	 */
 	public function changeLTEStatus ($status) {
-		throw new Exception('unstable funtion');
+		$this->checkLogin();
+		
+		/* we have to wait 400ms before we can send the request (idk whats wrong with the router) */
+		usleep(400);
+		
 		$path = 'data/Modules.json';
 		
 		if ($status == '0' || $status == '1' || $status == 'yes' || $status == 'no') {
@@ -49,13 +52,17 @@ trait Connection {
 			
 			$fields = array('csrf_token' => $this->token, 'use_lte' => $status);
 			$data = $this->sendEncryptedRequest($path, $fields, true);
+			$data = $this->getValues($data['body']);
 			
-			// debug only
-			return $data;
+			if ($data['status'] == 'ok') {
+				return true;
+			}
 		}
 		else {
 			throw new RouterException('unknown status');
 		}
+		
+		return false;
 	}
 	
 	/**
@@ -66,10 +73,16 @@ trait Connection {
 	public function reconnectLte () {
 		$this->checkLogin();
 		
+		/* we have to wait 400ms before we can send the request (idk whats wrong with the router) */
+		usleep(400);
+		
 		$path = 'data/modules.json';
 		$fields = array('csrf_token' => $this->token, 'lte_reconn' => '1');
 		$data = $this->sendEncryptedRequest($path, $fields, true);
+		if ($data['status'] == 'ok') {
+			return true;
+		}
 		
-		return $data['body'];
+		return false;
 	}
 }
