@@ -6,15 +6,17 @@
  */
 trait System {
 	/**
-	 * get uptime based on online (connection) time
+	 * get uptime based on last reboot
 	 *
 	 * @return	string
 	 */
 	public function getUptime () {
-		$data = $this->getData('Overview');
-		$data = $this->getValues($data);
+		$lastReboot = $this->getLastReboot();
 		
-		return $data['days_online'];
+		$dtF = new DateTime("@0");
+		$dtT = new DateTime("@".$lastReboot);
+		
+		return $dtF->diff($dtT)->format('%a days, %h hours, %i minutes and %s seconds');
 	}
 	
 	/**
@@ -48,6 +50,20 @@ trait System {
 		else {
 			return array();
 		}
+	}
+	
+	/**
+	 * get Last Reboot time
+	 * 
+	 * @return	int
+	 */
+	public function getLastReboot () {
+		$response = $this->sendRequest("data/Reboot.json");
+		$response = $this->getValues($response);
+
+		$lastReboot = time() - strtotime($response['reboot_date']." ".$response['reboot_time']);
+		
+		return $lastReboot;
 	}
 	
 	/**
