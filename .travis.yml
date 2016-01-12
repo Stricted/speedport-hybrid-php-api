@@ -1,16 +1,18 @@
 language: php
+sudo: false
 php:
+  - 5.3
   - 5.4
   - 5.5
   - 5.6
-  - nightly
-allow_failures:
-    - php: nightly
-before_install:
-  - pear install pear/PHP_CodeSniffer
-  - phpenv rehash
+  - 7.0
+  - hhvm
 before_script:
+  - if [ "$TRAVIS_PHP_VERSION" != "hhvm" ]; then phpenv config-rm xdebug.ini; fi
+  - travis_retry composer self-update
+  - travis_retry composer require "squizlabs/php_codesniffer=*"
+  - travis_retry composer install --no-interaction --prefer-source
   - git clone --branch=master --depth=1 --quiet git://github.com/WoltLab/WCF.git WCF
 script:
-  - find . -type f -name '*.php' -not -path "./WCF/*" |xargs -I file php -l file  > /dev/null
-  - phpcs -p --extensions=php --standard="`pwd`/WCF/CodeSniff/WCF" --ignore="CryptLib/" --ignore="WCF/" .
+  - find . -type f -name '*.php' -not -path "./WCF/*" -not -path "./vendor/*" |xargs -I file php -l file  > /dev/null
+  - vendor/bin/phpcs -p --extensions=php --standard="`pwd`/WCF/CodeSniff/WCF" --ignore="lib/system/api/" --ignore="WCF/" --ignore="vendor/" .
