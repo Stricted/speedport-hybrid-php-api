@@ -87,7 +87,7 @@ class Data extends SpeedportHybrid {
 	}
 	
 	public function getLTEInfo () {
-		return $this->getData('letinfo');
+		return $this->getData('lteinfo');
 	}
 	
 	public function getStatus () {
