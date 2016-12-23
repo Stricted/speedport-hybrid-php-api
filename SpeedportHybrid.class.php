@@ -115,17 +115,16 @@ class SpeedportHybrid {
 	 * @return	array
 	 */
 	private function sendRequest ($path, $fields, $cookie = false, $count = 0) {
-		$url = $this->url.$path.'?lang=en';
+		$url = $this->url.$path;
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL, $url);
 		
 		if (!empty($fields)) {
+			curl_setopt($ch, CURLOPT_POST, true);
 			if (is_array($fields)) {
-				curl_setopt($ch, CURLOPT_POST, count($fields));
 				curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($fields));
 			}
 			else {
-				curl_setopt($ch, CURLOPT_POST, $count);
 				curl_setopt($ch, CURLOPT_POSTFIELDS, $fields);
 			}
 		}
