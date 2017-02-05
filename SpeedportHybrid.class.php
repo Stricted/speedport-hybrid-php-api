@@ -121,6 +121,7 @@ class SpeedportHybrid {
 		
 		if (!empty($fields)) {
 			curl_setopt($ch, CURLOPT_POST, true);
+			
 			if (is_array($fields)) {
 				curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($fields));
 			}
