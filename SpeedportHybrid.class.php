@@ -1,6 +1,7 @@
 <?php
 require_once('lib/exception/RebootException.class.php');
 require_once('lib/exception/RouterException.class.php');
+require_once('lib/exception/NotImplementedException.class.php');
 require_once('CryptLib/CryptLib.php');
 require_once('Speedport.class.php');
 require_once('ISpeedport.class.php');
@@ -15,7 +16,7 @@ require_once('lib/trait/System.class.php');
 /**
  * @author      Jan Altensen (Stricted)
  * @license     GNU Lesser General Public License <http://opensource.org/licenses/lgpl-license.php>
- * @copyright   2015 Jan Altensen (Stricted)
+ * @copyright   2015-2016 Jan Altensen (Stricted)
  */
 class SpeedportHybrid extends Speedport implements ISpeedport {
 	use Connection;
@@ -30,7 +31,7 @@ class SpeedportHybrid extends Speedport implements ISpeedport {
 	 * class version
 	 * @const	string
 	 */
-	const VERSION = '1.0.4';
+	const VERSION = '1.0.5';
 	
 	/**
 	 * check php requirements
@@ -79,10 +80,41 @@ class SpeedportHybrid extends Speedport implements ISpeedport {
 	 * @param	integer	$count
 	 * @return	array
 	 */
-	protected function sentRequest ($path, $fields, $cookie = false, $count = 0) {
-		$data = parent::sentRequest($path, $fields, $cookie, $count);
-		$header = $data['header'];
-		$body = $data['body'];
+	private function sendRequest ($path, $fields, $cookie = false, $count = 0) {
+		$url = $this->url.$path;
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL, $url);
+		
+		if (!empty($fields)) {
+			curl_setopt($ch, CURLOPT_POST, true);
+			
+			if (is_array($fields)) {
+				curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($fields));
+			}
+			else {
+				curl_setopt($ch, CURLOPT_POSTFIELDS, $fields);
+			}
+		}
+		
+		if ($cookie === true) {
+			curl_setopt($ch, CURLOPT_COOKIE, 'challengev='.$this->challenge.'; '.$this->cookie);
+		}
+		
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_HEADER, true);
+		
+		$result = curl_exec($ch);
+		
+		$header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
+		$header = substr($result, 0, $header_size);
+		$body = substr($result, $header_size);
+		curl_close($ch);
+		
+		// check if response is empty
+		if (empty($body)) {
+			throw new RouterException('empty response');
+		}
+		
 		// check if body is encrypted (hex instead of json)
 		if (ctype_xdigit($body)) {
 			$body = $this->decrypt($body);

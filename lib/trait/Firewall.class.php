@@ -2,7 +2,7 @@
 /**
  * @author      Jan Altensen (Stricted)
  * @license     GNU Lesser General Public License <http://opensource.org/licenses/lgpl-license.php>
- * @copyright   2015 Jan Altensen (Stricted)
+ * @copyright   2015-2016 Jan Altensen (Stricted)
  */
 trait Firewall {
 	/**
@@ -13,8 +13,6 @@ trait Firewall {
 	public function getPortforwardingEntrys () {
 		$data = $this->getData('Portforwarding');
 		$data = $this->getValues($data);
-		
-		//print_r($data);
 		
 		if (isset($data['addportuw'])) {
 			return $data['addportuw'];
@@ -40,7 +38,7 @@ trait Firewall {
 						'deleteEntry' => 'delete'
 						);
 		
-		$data = $this->sentRequest($path, $fields, true);
+		$data = $this->sendRequest($path, $fields, true);
 		$data = $this->getValues($data['body']);
 		
 		if ($data['status'] == 'ok') {
@@ -58,6 +56,8 @@ trait Firewall {
 	 * @param	integer	$device
 	 */
 	public function addPortforwardingEntry ($name, $device) {
+		throw new NotImplementedException();
+		
 		// TODO: find a way to make this possible
 		/* fields:
 		 * 
@@ -104,6 +104,7 @@ trait Firewall {
 	 * @param	integer	$device
 	 */
 	public function editPortforwardingEntry ($id, $name, $device) {
+		throw new NotImplementedException();
 		// TODO: find a way to make this possible
 	}
 }

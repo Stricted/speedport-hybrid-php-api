@@ -2,7 +2,7 @@
 /**
  * @author      Jan Altensen (Stricted)
  * @license     GNU Lesser General Public License <http://opensource.org/licenses/lgpl-license.php>
- * @copyright   2015 Jan Altensen (Stricted)
+ * @copyright   2015-2016 Jan Altensen (Stricted)
  */
 trait Phone {
 	/**
@@ -48,7 +48,7 @@ trait Phone {
 						'phonebook_number_m' => $mobile
 						);
 		
-		$data = $this->sentRequest($path, $fields, true);
+		$data = $this->sendRequest($path, $fields, true);
 		$data = $this->getValues($data['body']);
 		
 		if ($data['status'] == 'ok') {
@@ -91,7 +91,7 @@ trait Phone {
 						'deleteEntry' => 'delete'
 						);
 		
-		$data = $this->sentRequest($path, $fields, true);
+		$data = $this->sendRequest($path, $fields, true);
 		$data = $this->getValues($data['body']);
 		
 		if ($data['status'] == 'ok') {

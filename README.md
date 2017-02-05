@@ -1,6 +1,6 @@
 ### speedport php api
 
-[![Build Status](https://travis-ci.org/Stricted/speedport-hybrid-php-api.svg?branch=test)](https://travis-ci.org/Stricted/speedport-hybrid-php-api) [![Release](https://img.shields.io/github/release/Stricted/speedport-hybrid-php-api.svg)](https://github.com/Stricted/speedport-hybrid-php-api/releases/latest) [![License](https://img.shields.io/badge/license-LGPLv3-brightgreen.svg)](https://github.com/Stricted/speedport-hybrid-php-api/blob/master/LICENSE)
+[![Build Status](https://travis-ci.org/Stricted/speedport-hybrid-php-api.svg?branch=master)](https://travis-ci.org/Stricted/speedport-hybrid-php-api) [![Release](https://img.shields.io/github/release/Stricted/speedport-hybrid-php-api.svg)](https://github.com/Stricted/speedport-hybrid-php-api/releases/latest) [![License](https://img.shields.io/badge/license-LGPLv3-brightgreen.svg)](https://github.com/Stricted/speedport-hybrid-php-api/blob/master/LICENSE)
 
 Access Speedport Router through PHP
 

@@ -2,19 +2,21 @@
 /**
  * @author      Jan Altensen (Stricted)
  * @license     GNU Lesser General Public License <http://opensource.org/licenses/lgpl-license.php>
- * @copyright   2015 Jan Altensen (Stricted)
+ * @copyright   2015-2016 Jan Altensen (Stricted)
  */
 trait System {
 	/**
-	 * get uptime based on online (connection) time
+	 * get uptime based on last reboot
 	 *
 	 * @return	string
 	 */
 	public function getUptime () {
-		$data = $this->getData('Overview');
-		$data = $this->getValues($data);
+		$lastReboot = $this->getLastReboot();
 		
-		return $data['days_online'];
+		$dtF = new DateTime("@0");
+		$dtT = new DateTime("@".$lastReboot);
+		
+		return $dtF->diff($dtT)->format('%a days, %h hours, %i minutes and %s seconds');
 	}
 	
 	/**
@@ -28,7 +30,7 @@ trait System {
 		
 		$path = 'data/'.$file.'.json';
 		$fields = array();
-		$data = $this->sentRequest($path, $fields, true);
+		$data = $this->sendRequest($path, $fields, true);
 		
 		return $data['body'];
 	}
@@ -51,6 +53,20 @@ trait System {
 	}
 	
 	/**
+	 * get Last Reboot time
+	 * 
+	 * @return	int
+	 */
+	public function getLastReboot () {
+		$response = $this->sendRequest("data/Reboot.json");
+		$response = $this->getValues($response);
+
+		$lastReboot = time() - strtotime($response['reboot_date']." ".$response['reboot_time']);
+		
+		return $lastReboot;
+	}
+	
+	/**
 	 * reset the router to Factory Default
 	 * not tested
 	 *
@@ -61,7 +77,7 @@ trait System {
 		
 		$path = 'data/resetAllSetting.json';
 		$fields = array('csrf_token' => 'nulltoken', 'showpw' => 0, 'password' => $this->hash, 'reset_all' => 'true');
-		$data = $this->sentRequest($path, $fields, true);
+		$data = $this->sendRequest($path, $fields, true);
 		
 		return $data['body'];
 	}
@@ -77,7 +93,7 @@ trait System {
 		
 		$path = 'data/checkfirmware.json';
 		$fields = array('checkfirmware' => 'true');
-		$data = $this->sentRequest($path, $fields, true);
+		$data = $this->sendRequest($path, $fields, true);
 		
 		return $data['body'];
 	}
@@ -92,7 +108,7 @@ trait System {
 		
 		$path = 'data/Reboot.json';
 		$fields = array('csrf_token' => $this->token, 'reboot_device' => 'true');
-		$data = $this->sentEncryptedRequest($path, $fields, true);
+		$data = $this->sendEncryptedRequest($path, $fields, true);
 		$data = $this->getValues($data['body']);
 		
 		if ($data['status'] == 'ok') {

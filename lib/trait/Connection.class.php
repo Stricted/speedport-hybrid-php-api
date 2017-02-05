@@ -2,7 +2,7 @@
 /**
  * @author      Jan Altensen (Stricted)
  * @license     GNU Lesser General Public License <http://opensource.org/licenses/lgpl-license.php>
- * @copyright   2015 Jan Altensen (Stricted)
+ * @copyright   2015-2016 Jan Altensen (Stricted)
  */
 trait Connection {
 	/**
@@ -18,19 +18,18 @@ trait Connection {
 		
 		if ($status == 'online' || $status == 'offline') {
 			$fields = array('csrf_token' => 'nulltoken', 'showpw' => 0, 'password' => $this->hash, 'req_connect' => $status);
-			$data = $this->sentRequest($path, $fields, true);
+			$data = $this->sendRequest($path, $fields, true);
 			$data = $this->getValues($data['body']);
 			
 			if ($data['status'] == 'ok') {
 				return true;
 			}
-			else {
-				return false;
-			}
 		}
 		else {
 			throw new RouterException('unknown status');
 		}
+		
+		return false;
 	}
 	
 	/**
@@ -40,7 +39,11 @@ trait Connection {
 	 * @return	boolean
 	 */
 	public function changeLTEStatus ($status) {
-		throw new Exception('unstable funtion');
+		$this->checkLogin();
+		
+		/* we have to wait 400ms before we can send the request (idk whats wrong with the router) */
+		usleep(400);
+		
 		$path = 'data/Modules.json';
 		
 		if ($status == '0' || $status == '1' || $status == 'yes' || $status == 'no') {
@@ -48,14 +51,18 @@ trait Connection {
 			else if ($status == 'no') $status = '0';
 			
 			$fields = array('csrf_token' => $this->token, 'use_lte' => $status);
-			$data = $this->sentEncryptedRequest($path, $fields, true);
+			$data = $this->sendEncryptedRequest($path, $fields, true);
+			$data = $this->getValues($data['body']);
 			
-			// debug only
-			return $data;
+			if ($data['status'] == 'ok') {
+				return true;
+			}
 		}
 		else {
 			throw new RouterException('unknown status');
 		}
+		
+		return false;
 	}
 	
 	/**
@@ -66,10 +73,16 @@ trait Connection {
 	public function reconnectLte () {
 		$this->checkLogin();
 		
+		/* we have to wait 400ms before we can send the request (idk whats wrong with the router) */
+		usleep(400);
+		
 		$path = 'data/modules.json';
 		$fields = array('csrf_token' => $this->token, 'lte_reconn' => '1');
-		$data = $this->sentEncryptedRequest($path, $fields, true);
+		$data = $this->sendEncryptedRequest($path, $fields, true);
+		if ($data['status'] == 'ok') {
+			return true;
+		}
 		
-		return $data['body'];
+		return false;
 	}
 }

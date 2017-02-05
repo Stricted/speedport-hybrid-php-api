@@ -2,7 +2,7 @@
 /**
  * @author      Jan Altensen (Stricted)
  * @license     GNU Lesser General Public License <http://opensource.org/licenses/lgpl-license.php>
- * @copyright   2015 Jan Altensen (Stricted)
+ * @copyright   2015-2016 Jan Altensen (Stricted)
  */
 trait Login {
 	/**
@@ -29,7 +29,7 @@ trait Login {
 		$path = 'data/Login.json';
 		$this->hash = hash('sha256', $this->challenge.':'.$password);
 		$fields = array('csrf_token' => 'nulltoken', 'showpw' => 0, 'password' => $this->hash);
-		$data = $this->sentRequest($path, $fields);
+		$data = $this->sendRequest($path, $fields);
 		$json = $this->getValues($data['body']);
 		
 		if (isset($json['login']) && $json['login'] == 'success') {
@@ -55,7 +55,7 @@ trait Login {
 	private function getChallenge () {
 		$path = 'data/Login.json';
 		$fields = array('csrf_token' => 'nulltoken', 'showpw' => 0, 'challengev' => 'null');
-		$data = $this->sentRequest($path, $fields);
+		$data = $this->sendRequest($path, $fields);
 		$data = $this->getValues($data['body']);
 		
 		if (isset($data['challengev']) && !empty($data['challengev'])) {
@@ -84,7 +84,7 @@ trait Login {
 		
 		$path = 'data/SecureStatus.json';
 		$fields = array();
-		$data = $this->sentRequest($path, $fields, true);
+		$data = $this->sendRequest($path, $fields, true);
 		$data = $this->getValues($data['body']);
 		
 		if ($data['loginstate'] != 1) {
@@ -108,7 +108,7 @@ trait Login {
 		
 		$path = 'data/Login.json';
 		$fields = array('csrf_token' => $this->token, 'logout' => 'byby');
-		$data = $this->sentRequest($path, $fields, true);
+		$data = $this->sendRequest($path, $fields, true);
 		$data = $this->getValues($data['body']);
 		if ((isset($data['status']) && $data['status'] == 'ok') && $this->checkLogin(false) === false) {
 			// reset challenge and session
@@ -133,7 +133,7 @@ trait Login {
 		
 		$path = 'html/content/overview/index.html';
 		$fields = array();
-		$data = $this->sentRequest($path, $fields, true);
+		$data = $this->sendRequest($path, $fields, true);
 		
 		$a = explode('csrf_token = "', $data['body']);
 		$a = explode('";', $a[1]);
@@ -158,8 +158,7 @@ trait Login {
 		// calculate derivedk
 		if (!function_exists('hash_pbkdf2')) {
 			$pbkdf2 = new CryptLib\Key\Derivation\PBKDF\PBKDF2(array('hash' => 'sha1'));
-			$derivedk = bin2hex($pbkdf2->derive(hash('sha256', $password), substr($this->challenge, 0, 16), 1000, 32));
-			$derivedk = substr($derivedk, 0, 32);
+			$derivedk = bin2hex($pbkdf2->derive(hash('sha256', $password), substr($this->challenge, 0, 16), 1000, 16));
 		}
 		else {
 			$derivedk = hash_pbkdf2('sha1', hash('sha256', $password), substr($this->challenge, 0, 16), 1000, 32);
