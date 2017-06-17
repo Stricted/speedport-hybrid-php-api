@@ -46,9 +46,15 @@ trait Login {
 		
 		$path = 'data/Login.json';
 		$this->hash = hash('sha256', $this->challenge.':'.$password);
-		$fields = array('csrf_token' => 'nulltoken', 'showpw' => 0, 'password' => $this->hash);
+		$fields = array('csrf_token' => 'nulltoken', "challengev" => $this->challenge, 'showpw' => 0, 'password' => $this->hash);
 		$data = $this->sendRequest($path, $fields);
 		$json = $this->getValues($data['body']);
+		
+		if (in_array("challenge", $json)) {
+			$fields = array('csrf_token' => 'nulltoken', 'showpw' => 0, 'password' => $this->hash);
+			$data = $this->sendRequest($path, $fields);
+			$json = $this->getValues($data['body']);
+		}
 		
 		if (isset($json['login']) && $json['login'] == 'success') {
 			$this->cookie = $this->getCookie($data);
@@ -69,7 +75,7 @@ trait Login {
 	/**
 	 * Requests the password-challenge from the router.
 	 */
-	private function getChallenge () {
+	private function getChallenge_old () {
 		$path = 'data/Login.json';
 		$fields = array('csrf_token' => 'nulltoken', 'showpw' => 0, 'challengev' => 'null');
 		$data = $this->sendRequest($path, $fields);
@@ -77,6 +83,30 @@ trait Login {
 		
 		if (isset($data['challengev']) && !empty($data['challengev'])) {
 			return $data['challengev'];
+		}
+		else {
+			throw new RouterException('unable to get the challenge from the router');
+		}
+	}
+	
+	/**
+	 * Requests the password-challenge from the router.
+	 */
+	private function getChallenge () {
+		$path = 'html/content/overview/index.html';
+		$fields = array();
+		$data = $this->sendRequest($path, $fields, true);
+		
+		$a = explode('challenge = "', $data['body']);
+		
+		if (!isset($a[1])) {
+			return getChallenge_old();
+		}
+		
+		$a = explode('";', $a[1]);
+		
+		if (isset($a[0]) && !empty($a[0])) {
+			return $a[0];
 		}
 		else {
 			throw new RouterException('unable to get the challenge from the router');
