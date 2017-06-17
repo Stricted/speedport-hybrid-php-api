@@ -100,7 +100,7 @@ trait Login {
 		$a = explode('challenge = "', $data['body']);
 		
 		if (!isset($a[1])) {
-			return getChallenge_old();
+			return $this->getChallenge_old();
 		}
 		
 		$a = explode('";', $a[1]);
