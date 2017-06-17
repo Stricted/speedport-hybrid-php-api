@@ -49,12 +49,11 @@ trait Login {
 		$fields = array('csrf_token' => 'nulltoken', "challengev" => $this->challenge, 'showpw' => 0, 'password' => $this->hash);
 		$data = $this->sendRequest($path, $fields);
 		$json = $this->getValues($data['body']);
-		if (!in_array("challenge", $json)) {
+		if (array_key_exists("challengev", $json)) {
 			$fields = array('csrf_token' => 'nulltoken', 'showpw' => 0, 'password' => $this->hash);
 			$data = $this->sendRequest($path, $fields);
 			$json = $this->getValues($data['body']);
 		}
-		
 		if (isset($json['login']) && $json['login'] == 'success') {
 			$this->cookie = $this->getCookie($data);
 			
