@@ -49,8 +49,7 @@ trait Login {
 		$fields = array('csrf_token' => 'nulltoken', "challengev" => $this->challenge, 'showpw' => 0, 'password' => $this->hash);
 		$data = $this->sendRequest($path, $fields);
 		$json = $this->getValues($data['body']);
-		
-		if (in_array("challenge", $json)) {
+		if (!in_array("challenge", $json)) {
 			$fields = array('csrf_token' => 'nulltoken', 'showpw' => 0, 'password' => $this->hash);
 			$data = $this->sendRequest($path, $fields);
 			$json = $this->getValues($data['body']);
@@ -93,10 +92,9 @@ trait Login {
 	 * Requests the password-challenge from the router.
 	 */
 	private function getChallenge () {
-		$path = 'html/content/overview/index.html';
+		$path = 'html/login/index.html';
 		$fields = array();
-		$data = $this->sendRequest($path, $fields, true);
-		
+		$data = $this->sendRequest($path, $fields);
 		$a = explode('challenge = "', $data['body']);
 		
 		if (!isset($a[1])) {
