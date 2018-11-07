@@ -79,6 +79,8 @@ trait Connection {
 		$path = 'data/modules.json';
 		$fields = array('csrf_token' => $this->token, 'lte_reconn' => '1');
 		$data = $this->sendEncryptedRequest($path, $fields, true);
+		$data = $this->getValues($data['body']);
+
 		if ($data['status'] == 'ok') {
 			return true;
 		}
